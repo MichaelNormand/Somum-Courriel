@@ -1087,6 +1087,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!selection.HasSelection) {
             let loneElement = selection.ActiveElements[0]
             if (loneElement.tagName === 'P') {
+                loneElement = loneElement.lastChild
                 let textContent = loneElement.textContent
                 let newElement = document.createElement('somum-custom-style')
                 newElement.innerHTML = textContent.split(' ').join('&nbsp;')
@@ -1116,21 +1117,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (selectedTextElement !== undefined && selectedTextElement.length > 0) {
                 let selectedElement = document.createElement('somum-custom-style')
                 if (element.tagName === 'P') {
-                    element.textContent = ''
-                    element.innerHTML = ''
-
-                    if (firstTextElement !== undefined && firstTextElement.length > 0) {
-                        let firstElement = document.createElement('somum-custom-style')
-                        firstElement.innerHTML = firstTextElement.split(' ').join('&nbsp;')
-                        element.appendChild(firstElement)
-                    }
-                    selectedElement.innerHTML = selectedTextElement.split(' ').join('&nbsp;')
-                    element.appendChild(selectedElement)
-                    if (lastTextElement !== undefined && lastTextElement.length > 0) {
-                        let lastElement = document.createElement('somum-custom-style')
-                        lastElement.innerHTML = lastTextElement.split(' ').join('&nbsp;')
-                        element.appendChild(lastElement)
-                    }
+                    return undefined
                 } else if (element.tagName === 'SOMUM-CUSTOM-STYLE') {
                     selectedElement = element
                     selectedElement.textContent = selectedTextElement
@@ -1581,16 +1568,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 return
             }
             if (activeSelection.type === 'Caret') {
-                if (activeSelection.anchorNode.tagName === undefined && activeSelection.anchorNode.parentElement.tagName === 'P') {
+                let activeTag = activeSelection.anchorNode
+                if (activeSelection.anchorNode.tagName === undefined && activeSelection.anchorNode.parentElement.tagName === 'SOMUM-CUSTOM-STYLE') {
                     activeTag = activeSelection.anchorNode.parentNode
-                } else if (activeSelection.anchorNode.tagName === 'P') {
-                    activeTag = activeSelection.anchorNode
+                } else if (activeSelection.anchorNode.tagName === 'SOMUM-CUSTOM-STYLE') {
+                    activeTag = activeSelection.anchorNode.lastChild
                 }
-                selection = {
-                    ActiveElements: [activeTag],
-                    HasSelection: false,
-                    StartOffset: activeSelection.anchorOffset,
-                    EndOffset: activeSelection.focusOffset,
+                if (activeTag.tagName === 'SOMUM-CUSTOM-STYLE') {
+                    selection = {
+                        ActiveElements: [activeTag],
+                        HasSelection: false,
+                        StartOffset: activeSelection.anchorOffset,
+                        EndOffset: activeSelection.focusOffset,
+                    }
                 }
                 return
             }
