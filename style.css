@@ -1,0 +1,31 @@
+html,
+body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    background: url('https://i.pinimg.com/originals/3b/8a/d2/3b8ad2c7b1be2caf24321c852103598a.jpg') no-repeat center center fixed;
+    /*background: url('https://wallpaperplay.com/walls/full/7/e/c/86362.jpg') no-repeat center center fixed;*/
+    /*background-color: black;*/
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+}
+
+body * {
+    margin: 0;
+    box-sizing: border-box;
+    font-family: 'B12 Regular';
+}
+
+.parent {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+}
