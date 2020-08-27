@@ -113,7 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return element
     }
 
-    let createTextAlignElementForContent = (name, image, indentContent, indentThumbnailArrow, callback) => {
+    let createTextAlignElementForContent = (name, image, textAlignementContent, textAlignementThumbnailArrow, callback) => {
         let element = document.createElement('div')
         element.appendChild(image)
         element.id = name
@@ -131,10 +131,10 @@ document.addEventListener('DOMContentLoaded', () => {
             element.style.backgroundColor = 'rgba(0, 0, 0, 0)'
         })
         element.addEventListener('click', () => {
-            indentDropdownToggled = false
-            indentContent.style.display = 'none'
-            indentThumbnailArrow.style.borderColor = 'black transparent transparent transparent'
-            indentThumbnailArrow.style.margin = '15px 0px 0px 0px'
+            textAlignDropdownToggled = false
+            textAlignementContent.style.display = 'none'
+            textAlignementThumbnailArrow.style.borderColor = 'black transparent transparent transparent'
+            textAlignementThumbnailArrow.style.margin = '15px 0px 0px 0px'
             if (callback === undefined) {
                 return
             }
@@ -1264,94 +1264,74 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     let policeTextAlignementLeftCallback = () => {
-        let selection = getSelection()
-        selection.SelectedElements.forEach((element) => {
-            let container = element.parentElement
-            container.style.justifyContent = 'flex-start'
-            element.style.textAlign = 'left'
-            if (container.tagName === 'OL' || container.tagName === 'UL') {
-                container.children.forEach((child) => {
-                    child.style.textAlign = 'left'
-                })
-                container.style.paddingLeft = '40px'
-                container.style.alignItems = 'flex-start'
-                container.style.justifyContent = 'center'
-            }
-        })
-        placeCaretAtEnd(selection.SelectedElements.pop())
+        let container = selection.ActiveElements[0]
+        while (container.tagName !== 'P') {
+            container = container.parentElement
+        }
+        container.style.textAlign = 'left'
+        container.parentElement.style.justifyContent = 'flex-start'
+        placeCaretAtEnd(container.lastChild)
         addContentState()
     }
 
     let policeTextAlignementCenterCallback = () => {
-        let selection = getSelection()
-        selection.SelectedElements.forEach((element) => {
-            let container = element.parentElement
-            container.style.justifyContent = 'center'
-            container.style.padding = '0'
-            element.style.textAlign = 'center'
-            element.style.padding = '0'
-            if (container.tagName === 'OL' || container.tagName === 'UL') {
-                container.children.forEach((child) => {
-                    child.style.textAlign = 'center'
-                })
-                container.style.alignItems = 'center'
-                container.style.justifyContent = 'center'
-            }
-        })
-        placeCaretAtEnd(selection.SelectedElements.pop())
+        let container = selection.ActiveElements[0]
+        while (container.tagName !== 'P') {
+            container = container.parentElement
+        }
+        container.style.textAlign = 'center'
+        container.parentElement.style.justifyContent = 'center'
+        placeCaretAtEnd(container.lastChild)
         addContentState()
     }
 
     let policeTextAlignementRightCallback = () => {
-        let selection = getSelection()
-        selection.SelectedElements.forEach((element) => {
-            let container = element.parentElement
-            container.style.justifyContent = 'flex-end'
-            container.style.padding = '0'
-            element.style.textAlign = 'right'
-            element.style.padding = '0'
-            if (container.tagName === 'OL' || container.tagName === 'UL') {
-                container.children.forEach((child) => {
-                    child.style.textAlign = 'right'
-                })
-                container.style.alignItems = 'flex-end'
-                container.style.justifyContent = 'center'
-            }
-        })
-        placeCaretAtEnd(selection.SelectedElements.pop())
+        let container = selection.ActiveElements[0]
+        while (container.tagName !== 'P') {
+            container = container.parentElement
+        }
+        container.style.textAlign = 'right'
+        container.parentElement.style.justifyContent = 'flex-end'
+        placeCaretAtEnd(container.lastChild)
         addContentState()
     }
 
     let policeAddIndentCallback = () => {
-        let selection = getSelection(true)
+        let container = selection.ActiveElements[0]
         let sizeIndent = parseInt(indentSize.replace('px', ''))
-        selection.SelectedElements.forEach((element) => {
-            let currentIndent = element.style.textIndent.replace('px', '')
-            if (currentIndent === '') {
-                element.style.textIndent = indentSize
-                return
-            }
-            let currentIndentSize = parseInt(currentIndent) + sizeIndent
-            element.style.textIndent = currentIndentSize + 'px'
-        })
-        placeCaretAtEnd(selection.SelectedElements.pop())
+        while (container.tagName !== 'P') {
+            container = container.parentElement
+        }
+        let firstElement = container.firstChild
+        let currentIndent = firstElement.style.marginLeft.replace('px', '')
+        if (currentIndent === '') {
+            firstElement.style.marginLeft = indentSize
+            return
+        }
+        let currentIndentSize = parseInt(currentIndent) + sizeIndent
+        firstElement.style.marginLeft = currentIndentSize + 'px'
+        placeCaretAtEnd(container.lastChild)
         addContentState()
     }
 
     let policeRemoveIndentCallback = () => {
-        let selection = getSelection(true)
+        let container = selection.ActiveElements[0]
         let sizeIndent = parseInt(indentSize.replace('px', ''))
-        selection.SelectedElements.forEach((element) => {
-            let currentIndent = element.style.textIndent.replace('px', '')
-            let currentIndentSize = parseInt(currentIndent) - sizeIndent
-            if (currentIndent !== '' && currentIndentSize > 0) {
-                element.style.textIndent = currentIndentSize + 'px'
-                return
-            }
-            element.style.textIndent = ''
-        })
-        placeCaretAtEnd(selection.SelectedElements.pop())
+        while (container.tagName !== 'P') {
+            container = container.parentElement
+        }
+        let firstElement = container.firstChild
+        let currentIndent = firstElement.style.marginLeft.replace('px', '')
+        let currentIndentSize = parseInt(currentIndent) - sizeIndent
+        if (currentIndent !== '' && currentIndentSize > 0) {
+            firstElement.style.marginLeft = currentIndentSize + 'px'
+            addContentState()
+            placeCaretAtEnd(container.lastChild)
+            return
+        }
+        firstElement.style.marginLeft = ''
         addContentState()
+        placeCaretAtEnd(container.lastChild)
     }
 
     let policeAddNumberedListCallback = () => {
@@ -1561,6 +1541,11 @@ document.addEventListener('DOMContentLoaded', () => {
         content.style.borderColor = '#275C8C'
         content.style.backgroundColor = 'white'
         content.style.width = '631px'
+        content.style.display = 'flex'
+        content.style.flexWrap = 'wrap'
+        content.style.flexDirection = 'column'
+        content.style.justifyContent = 'flex-start'
+        content.style.alignItems = 'flex-start'
 
         document.addEventListener('selectionchange', () => {
             let activeSelection = document.getSelection()
@@ -1571,10 +1556,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 let activeTag = activeSelection.anchorNode
                 if (activeSelection.anchorNode.tagName === undefined && activeSelection.anchorNode.parentElement.tagName === 'SOMUM-CUSTOM-STYLE') {
                     activeTag = activeSelection.anchorNode.parentNode
-                } else if (activeSelection.anchorNode.tagName === 'SOMUM-CUSTOM-STYLE') {
+                } else if (activeSelection.anchorNode.tagName === 'P') {
                     activeTag = activeSelection.anchorNode.lastChild
                 }
-                if (activeTag.tagName === 'SOMUM-CUSTOM-STYLE') {
+                if (activeTag !== undefined && activeTag !== null && (activeTag.tagName === 'SOMUM-CUSTOM-STYLE' || activeTag.tagName === 'LI')) {
                     selection = {
                         ActiveElements: [activeTag],
                         HasSelection: false,
@@ -1605,10 +1590,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 return
             }
-            let container = firstNode
-            while (container.tagName !== 'P') {
-                container = container.parentElement
-            }
+            let container = firstNode.parentElement
             console.log(container.children)
             let firstNodeIndex
             let secondNodeIndex
@@ -1622,12 +1604,44 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (firstNodeIndex !== undefined && secondNodeIndex !== undefined) {
                     break
                 }
+                if (container.children[i].tagName === 'UL' || container.children[i].tagName === 'OL') {
+                    for (let j = 0; j < container.children[i].children.length; j++) {
+                        for (let k = 0; k < container.children[i].children[j].children.length; k++) {
+                            if (container.children[i].children[j].children[k] === firstNode) {
+                                firstNodeIndex = i
+                            }
+                            if (container.children[i].children[j].children[k] === secondNode) {
+                                secondNodeIndex = i
+                            }
+                            if (firstNodeIndex !== undefined && secondNodeIndex !== undefined) {
+                                break
+                            }
+                        }
+                    }
+                }
             }
             let listOfElements = []
             let startPoint = firstNodeIndex < secondNodeIndex ? firstNodeIndex : secondNodeIndex
             let endPoint = firstNodeIndex < secondNodeIndex ? secondNodeIndex : firstNodeIndex
+            let lastElement = firstNodeIndex < secondNodeIndex ? secondNode : firstNode
+            let lastElementFound = false
             for (let i = startPoint; i <= endPoint; i++) {
-                listOfElements.push(container.children[i])
+                if (container.children[i].tagName !== 'OL' && container.children[i].tagName !== 'UL') {
+                    listOfElements.push(container.children[i])
+                } else {
+                    for (let j = 0; j < container.children[i].children.length; j++) {
+                        for (let k = 0; k < container.children[i].children[j].children.length; k++) {
+                            listOfElements.push(container.children[i].children[j])
+                            if (container.children[i].children[j].children[k] === lastElement) {
+                                lastElementFound = true
+                                break
+                            }
+                        }
+                        if (lastElementFound) {
+                            break
+                        }
+                    }
+                }
             }
             selection = {
                 ActiveElements: listOfElements,
@@ -1636,6 +1650,39 @@ document.addEventListener('DOMContentLoaded', () => {
                 EndOffset: firstNodeIndex < secondNodeIndex ? activeSelection.focusOffset : activeSelection.anchorOffset,
             }
             return
+        })
+
+        content.addEventListener('keydown', (event) => {
+            console.log(event)
+            let activeSelection = window.getSelection()
+            let activeElement = activeSelection.anchorNode
+            let newValue = event.key
+            if (newValue.length === 1) {
+                if (activeElement.tagName === undefined) {
+                    activeElement = activeElement.parentElement
+                }
+                if (activeElement.tagName === 'P' && activeElement.children.length > 0 && activeElement.lastChild.tagName === 'SOMUM-CUSTOM-STYLE') {
+                    event.preventDefault()
+                    activeElement.lastChild.textContent = activeElement.lastChild.textContent + newValue.split(' ').join('&nbsp;')
+                    placeCaretAtEnd(activeElement.lastChild)
+                } else if (activeElement.tagName === 'P' && (activeElement.children.length <= 0 || (activeElement.children[0] !== undefined && activeElement.children[0].tagName === 'BR'))) {
+                    event.preventDefault()
+                    if (activeElement.children[0] !== undefined) {
+                        activeElement.removeChild(activeElement.children[0])
+                    }
+                    let firstElement = document.createElement('somum-custom-style')
+                    firstElement.style.minHeight = '18px'
+                    firstElement.textContent = newValue.split(' ').join('&nbsp;')
+                    activeElement.appendChild(firstElement)
+                    placeCaretAtEnd(firstElement)
+                } else if (activeElement.tagName !== 'SOMUM-CUSTOM-STYLE') {
+                    let i = 0
+                }
+            }
+        })
+
+        content.addEventListener('input', () => {
+            addContentState()
         })
 
         policeSelection = createPoliceSelection(policeChangeCallback)
@@ -1766,7 +1813,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
             if (!childSelected && content.contains(event.target)) {
-                placeCaretAtEnd(content.lastChild.firstChild)
+                placeCaretAtEnd(content.lastChild.lastChild)
             }
         }
 
