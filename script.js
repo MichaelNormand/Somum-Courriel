@@ -1993,6 +1993,10 @@ document.addEventListener('DOMContentLoaded', () => {
                                     container.style.paddingLeft = '0'
                                     placeCaretAtEnd(container.firstChild)
                                 }
+                            } else if (container.lastChild.tagName === 'SOMUM-CUSTOM-STYLE' && container.lastChild.textContent.length === 1 && container.children.length === 2) {
+                                event.preventDefault()
+                                container.lastChild.textContent = ''
+                                placeCaretAtEnd(container.lastChild)
                             }
                         }
                     } else {
