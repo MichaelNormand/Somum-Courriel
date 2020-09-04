@@ -1426,7 +1426,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         numberedList.appendChild(firstElement)
         numberedList.style.paddingLeft = '15px'
-        numberedList.style.display = 'flex'
         numberedList.setAttribute('counter', '1')
         itterator.contentEditable = 'false'
         itterator.innerHTML = '1.&nbsp;'
@@ -1470,7 +1469,6 @@ document.addEventListener('DOMContentLoaded', () => {
         let itterator = document.createElement('somum-counter')
         let mainContentWidth = parseInt(mainContent.style.width.replace('px', '')) - 14
         orderedList.contentEditable = 'true'
-        orderedList.style.display = 'flex'
         mainContainer.setAttribute('isorderedlist', 'true')
         if (!addContainer) {
             orderedList.removeChild(orderedList.lastChild)
@@ -1572,7 +1570,6 @@ document.addEventListener('DOMContentLoaded', () => {
         firstParagraph.style.minHeight = '20px'
         firstParagraph.style.cursor = 'text'
         firstParagraph.style.outline = 'none'
-        firstParagraph.style.display = 'flex'
         firstParagraph.addEventListener('focusin', () => {
             firstParagraph.style.borderBottom = '1px solid rgb(39, 92, 140)'
         })
@@ -1952,7 +1949,6 @@ document.addEventListener('DOMContentLoaded', () => {
                                         newContainer.style.minHeight = '20px'
                                         newContainer.style.cursor = 'text'
                                         newContainer.style.outline = 'none'
-                                        newContainer.style.display = 'flex'
                                         newContainer.addEventListener('focusin', () => {
                                             newContainer.style.borderBottom = '1px solid rgb(39, 92, 140)'
                                         })
@@ -2070,7 +2066,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     newContainer.style.minHeight = '20px'
                     newContainer.style.cursor = 'text'
                     newContainer.style.outline = 'none'
-                    newContainer.style.display = 'flex'
                     newContainer.addEventListener('focusin', () => {
                         newContainer.style.borderBottom = '1px solid rgb(39, 92, 140)'
                     })
@@ -2130,7 +2125,6 @@ document.addEventListener('DOMContentLoaded', () => {
                                 newContainer.style.minHeight = '20px'
                                 newContainer.style.cursor = 'text'
                                 newContainer.style.outline = 'none'
-                                newContainer.style.display = 'flex'
                                 newContainer.addEventListener('focusin', () => {
                                     newContainer.style.borderBottom = '1px solid rgb(39, 92, 140)'
                                 })
@@ -2188,14 +2182,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         newContainer.appendChild(newCounter)
                         newContainer.appendChild(newStyle)
                         newContainer.style.paddingLeft = '15px'
-                        newContainer.style.display = 'flex'
                         newCounter.contentEditable = 'false'
                         newContainer.style.width = `${mainContentWidth}px`
                         newContainer.style.maxWidth = `${mainContentWidth}px`
                         newContainer.style.cursor = 'text'
                         newContainer.style.outline = 'none'
                         newContainer.style.minHeight = '20px'
-                        newContainer.style.display = 'flex'
                         newContainer.addEventListener('focusin', () => {
                             newContainer.style.borderBottom = '1px solid rgb(39, 92, 140)'
                         })
