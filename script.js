@@ -1,4 +1,4 @@
-﻿let mainRoot = 'beans'
+﻿let mainRoot = 'somum-sourriel'
 let mainRootHeight = '410px'
 let indentSize = '20px'
 let policeDropdownToggled = false
@@ -2384,7 +2384,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             if (!childSelected && content.contains(event.target)) {
                 if (layoutOptionToggled) {
-                    placeCaretAtEnd(content.lastChild.lastChild.lastChild)
+                    placeCaretAtEnd(content.lastChild.lastChild.lastChild.lastChild)
                 } else {
                     placeCaretAtEnd(content.lastChild.lastChild)
                 }
