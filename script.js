@@ -6,6 +6,8 @@ let sizeDropdownToggled = false
 let textAlignDropdownToggled = false
 let indentDropdownToggled = false
 let morePoliceDropdownToggled = false
+let layoutOptionToggled = false
+let layoutSelected
 let policeSelected = 'sans-serif'
 let sizeSelected = 'small'
 let colorSelected = '#000000'
@@ -13,6 +15,7 @@ let contentState = []
 let contentIndex = 0
 let screenWidth
 let selection
+let latestScreenWidth
 
 document.addEventListener('DOMContentLoaded', () => {
     // Content creation functions
@@ -141,6 +144,109 @@ document.addEventListener('DOMContentLoaded', () => {
             callback('Toggled')
         })
         return element
+    }
+    let createRightClickMenu = (xPosition, yPosition, layoutOptionToggledCallback, colorChangeOptionToggledCallback) => {
+        if (isNaN(xPosition) || isNaN(yPosition)) {
+            return undefined
+        }
+        let selectedLayout = layoutSelected
+        let container = document.createElement('div')
+        let layoutOptionContainer = document.createElement('div')
+        let layoutOptionThumbnail = document.createElement('span')
+        let layoutOptionText = document.createElement('p')
+        container.style.display = 'inline-flex'
+        container.style.flexWrap = 'wrap'
+        container.style.flexDirection = 'column'
+        container.style.position = 'fixed'
+        container.style.top = `${yPosition}px`
+        container.style.left = `${xPosition}px`
+        container.style.padding = '6px 0px'
+        container.style.borderRadius = '5px'
+        container.style.border = '1px solid rgba(0, 0, 0, 0.1)'
+        container.style.boxShadow = 'lightgrey 20px 20px 50px'
+        container.style.backgroundColor = 'white'
+        layoutOptionContainer.style.display = 'inline-flex'
+        layoutOptionContainer.style.flexWrap = 'wrap'
+        layoutOptionContainer.style.flexDirection = 'row'
+        layoutOptionContainer.style.justifyContent = 'flex-start'
+        layoutOptionContainer.style.alignItems = 'center'
+        layoutOptionContainer.style.cursor = 'pointer'
+        layoutOptionContainer.style.padding = '4px 8px'
+        layoutOptionContainer.addEventListener('click', () => {
+            layoutOptionToggled = !layoutOptionToggled
+            if (layoutOptionToggledCallback === undefined) {
+                return
+            }
+            layoutOptionToggledCallback(layoutOptionToggled)
+        })
+        layoutOptionContainer.addEventListener('mouseenter', () => {
+            layoutOptionContainer.style.backgroundColor = 'rgba(0, 0, 0, 0.1)'
+        })
+        layoutOptionContainer.addEventListener('mouseleave', () => {
+            layoutOptionContainer.style.backgroundColor = 'rgba(0, 0, 0, 0)'
+        })
+        layoutOptionThumbnail.classList.add('material-icons')
+        layoutOptionThumbnail.innerHTML = 'view_compact'
+        layoutOptionThumbnail.style.fontSize = '26px'
+        layoutOptionThumbnail.style.color = 'rgb(39, 92, 140)'
+        layoutOptionThumbnail.style.padding = '0 6px 0 0'
+        layoutOptionText.style.fontFamily = "'Roboto', sans-serif"
+        layoutOptionText.style.color = 'rgb(39, 92, 140)'
+        layoutOptionText.textContent = layoutOptionToggled ? 'Utiliser le mode de texte' : 'Utiliser le mode cadré'
+        container.appendChild(layoutOptionContainer)
+        if (layoutSelected !== undefined && layoutOptionToggled) {
+            let colorChangeOptionContainer = document.createElement('div')
+            let colorChangeOptionThumbnail = document.createElement('span')
+            let colorChangeOptionText = document.createElement('p')
+            let colorChangeOptionInput = document.createElement('input')
+            let optionsBreak = document.createElement('div')
+            colorChangeOptionContainer.style.display = 'inline-flex'
+            colorChangeOptionContainer.style.flexWrap = 'wrap'
+            colorChangeOptionContainer.style.flexDirection = 'row'
+            colorChangeOptionContainer.style.justifyContent = 'flex-start'
+            colorChangeOptionContainer.style.alignItems = 'center'
+            colorChangeOptionContainer.style.cursor = 'pointer'
+            colorChangeOptionContainer.style.padding = '4px 8px'
+            colorChangeOptionContainer.addEventListener('click', () => {
+                colorChangeOptionInput.click()
+            })
+            colorChangeOptionContainer.addEventListener('mouseenter', () => {
+                colorChangeOptionContainer.style.backgroundColor = 'rgba(0, 0, 0, 0.1)'
+            })
+            colorChangeOptionContainer.addEventListener('mouseleave', () => {
+                colorChangeOptionContainer.style.backgroundColor = 'rgba(0, 0, 0, 0)'
+            })
+            colorChangeOptionThumbnail.classList.add('material-icons')
+            colorChangeOptionThumbnail.innerHTML = 'palette'
+            colorChangeOptionThumbnail.style.fontSize = '26px'
+            colorChangeOptionThumbnail.style.color = 'rgb(39, 92, 140)'
+            colorChangeOptionThumbnail.style.padding = '0 6px 0 0'
+            colorChangeOptionText.style.fontFamily = "'Roboto', sans-serif"
+            colorChangeOptionText.style.color = 'rgb(39, 92, 140)'
+            colorChangeOptionText.textContent = 'Changer la couleur de la section'
+            colorChangeOptionInput.style.display = 'none'
+            colorChangeOptionInput.type = 'color'
+            colorChangeOptionInput.addEventListener('change', (event) => {
+                if (colorChangeOptionToggledCallback === undefined) {
+                    return
+                }
+                colorChangeOptionToggledCallback(event.target.value, selectedLayout)
+                event.target.value = ''
+            })
+            optionsBreak.style.backgroundColor = 'rgba(39, 92, 140, 0.4)'
+            optionsBreak.style.height = '0.3px'
+            optionsBreak.style.width = '100%'
+            optionsBreak.style.margin = '4px 0'
+            colorChangeOptionContainer.appendChild(colorChangeOptionThumbnail)
+            colorChangeOptionContainer.appendChild(colorChangeOptionText)
+            colorChangeOptionContainer.appendChild(colorChangeOptionInput)
+            container.appendChild(optionsBreak)
+            container.appendChild(colorChangeOptionContainer)
+        }
+
+        layoutOptionContainer.appendChild(layoutOptionThumbnail)
+        layoutOptionContainer.appendChild(layoutOptionText)
+        return container
     }
 
     let createPoliceSelection = (callbackPoliceChangeFunction) => {
@@ -358,7 +464,7 @@ document.addEventListener('DOMContentLoaded', () => {
         colorPickerControl.id = 'color-picker-control'
 
         // Setting up the container
-        colorPickerContainer.style.display = 'inline-block'
+        colorPickerContainer.style.display = 'flex'
         colorPickerContainer.style.maxHeight = '36px'
         colorPickerContainer.style.cursor = 'pointer'
         colorPickerContainer.style.userSelect = 'none'
@@ -383,6 +489,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             colorSelected = event.target.value
             callbackColorChange(event.target.value)
+            event.target.value = ''
         })
         colorPickerContainer.appendChild(colorPickerThumbnail)
         colorPickerContainer.appendChild(colorPickerControl)
@@ -605,6 +712,8 @@ document.addEventListener('DOMContentLoaded', () => {
         indentThumbnailContainer.style.width = '58px'
         indentThumbnailContainer.style.maxHeight = '36px'
         indentThumbnailContainer.style.flexWrap = 'wrap'
+        indentThumbnailContainer.style.justifyContent = 'center'
+        indentThumbnailContainer.style.alignItems = 'center'
         indentThumbnailContainer.style.flexDirection = 'row'
         indentThumbnailContainer.style.cursor = 'pointer'
         indentThumbnailContainer.style.border = '1px solid transparent'
@@ -723,6 +832,8 @@ document.addEventListener('DOMContentLoaded', () => {
         textAlignThumbnailContainer.style.maxHeight = '36px'
         textAlignThumbnailContainer.style.flexWrap = 'wrap'
         textAlignThumbnailContainer.style.flexDirection = 'row'
+        textAlignThumbnailContainer.style.justifyContent = 'center'
+        textAlignThumbnailContainer.style.alignItems = 'center'
         textAlignThumbnailContainer.style.cursor = 'pointer'
         textAlignThumbnailContainer.style.border = '1px solid transparent'
         textAlignThumbnailContainer.style.borderColor = 'transparent transparent'
@@ -832,6 +943,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 reader.readAsDataURL(event.target.files[0])
             }
+            event.target.value = ''
         })
 
         imageSelectionContainer.appendChild(imageSelectionThumbnail)
@@ -906,129 +1018,19 @@ document.addEventListener('DOMContentLoaded', () => {
         return redoSelectionContainer
     }
 
-    // Selection within content function
-    let getSelection = (cannotBeNull = false) => {
-        let selection = window.getSelection()
-        if (selection.anchorNode === undefined || selection.anchorNode === null) {
-            return { SelectedElements: [] }
-        }
-        let range = selection.getRangeAt(0)
-        let allWithinRangeParent
-        if (!range.commonAncestorContainer.getElementsByTagName) {
-            allWithinRangeParent = []
-            allWithinRangeParent.push(selection.anchorNode.parentElement)
-        } else {
-            allWithinRangeParent = range.commonAncestorContainer.getElementsByTagName('*')
-        }
-        let firstElementIndex
-        let lastElementIndex
-        let selectedElements = []
-        let images = []
-        let containers = []
-        for (let i = 0, el; (el = allWithinRangeParent[i]); i++) {
-            if (selection.containsNode(el, true) && (el.tagName === 'P' || el.tagName === 'LI')) {
-                selectedElements.push(el)
-                continue
-            }
-            if (selection.containsNode(el, true) && el.tagName === 'DIV') {
-                containers.push(el)
-                continue
-            }
-            if (selection.containsNode(el, true) && el.tagName === 'IMG') {
-                containers.push(el)
-                continue
-            }
-        }
-        if (selectedElements.length <= 0 && containers.length > 0) {
-            return { SelectedElements: containers }
-        } else if (selectedElements.length <= 0 && images.length > 0) {
-            let imagesContainers = images.map((image) => {
-                return image.parentElement
-            })
-            return { SelectedElements: imagesContainers }
-        }
-        if (selection.anchorNode.parentElement === selectedElements[0]) {
-            firstElementIndex = selection.anchorOffset
-            lastElementIndex = selection.focusOffset
-        } else {
-            firstElementIndex = selection.focusOffset
-            lastElementIndex = selection.anchorOffset
-        }
-        if (selectedElements.length === 1) {
-            if (firstElementIndex === lastElementIndex) {
-                return { SelectedElements: selectedElements }
-            }
-            if (lastElementIndex < firstElementIndex) {
-                let reworkedFirstElement = lastElementIndex
-                let reworkedLastElement = firstElementIndex
-                firstElementIndex = reworkedFirstElement
-                lastElementIndex = reworkedLastElement
-            }
-            let firstPortionToTrim = selectedElements[0].textContent.substring(0, firstElementIndex)
-            let lastPortionToTrim = selectedElements[0].textContent.substring(lastElementIndex, selectedElements[0].textContent.length)
-            let selectedText = selectedElements[0].textContent.substring(firstElementIndex, lastElementIndex)
-            if (firstPortionToTrim !== undefined && firstPortionToTrim.length > 0) {
-                let newElement = selectedElements[0].cloneNode(true)
-                newElement.textContent = firstPortionToTrim.split(' ').join('')
-                newElement.innerHTML = firstPortionToTrim.split(' ').join('&nbsp;')
-                selectedElements[0].parentElement.insertBefore(newElement, selectedElements[0])
-            }
-            if (lastPortionToTrim !== undefined && lastPortionToTrim.length > 0) {
-                let newElement = selectedElements[0].cloneNode(true)
-                newElement.textContent = lastPortionToTrim.split(' ').join('')
-                newElement.innerHTML = lastPortionToTrim.split(' ').join('&nbsp;')
-                if (selectedElements[0].nextSibling !== undefined && selectedElements[0].nextSibling !== null) {
-                    selectedElements[0].parentElement.insertBefore(newElement, selectedElements[0].nextSibling)
-                } else {
-                    selectedElements[0].parentElement.appendChild(newElement)
-                }
-            }
-            selectedElements[0].textContent = selectedText.split(' ').join('')
-            selectedElements[0].innerHTML = selectedText.split(' ').join('&nbsp;')
-            return { SelectedElements: selectedElements }
-        } else if (selectedElements.length === 0) {
-            if (!cannotBeNull) {
-                return { SelectedElements: [] }
-            }
-            if (selection.anchorNode.tagName === 'BR') {
-                return { SelectedElements: [selection.anchorNode.parentElement] }
-            }
-            return { SelectedElements: [selection.anchorNode] }
-        }
-        let firstPortionToTrim = selectedElements[0].textContent.substring(0, firstElementIndex)
-        let lastPortionToTrim = selectedElements[selectedElements.length - 1].textContent.substring(lastElementIndex, selectedElements[selectedElements.length - 1].textContent.length)
-        let firstSelectedText = selectedElements[0].textContent.substring(firstElementIndex, selectedElements[0].length)
-        let lastSelectedText = selectedElements[selectedElements.length - 1].textContent.substring(0, lastElementIndex)
-        if (firstPortionToTrim !== undefined && firstPortionToTrim.length > 0) {
-            let newElement = selectedElements[0].cloneNode(true)
-            newElement.contentEditable = 'true'
-            newElement.textContent = firstPortionToTrim
-            selectedElements[0].parentElement.insertBefore(newElement, selectedElements[0])
-        }
-        if (lastPortionToTrim !== undefined && lastPortionToTrim.length > 0) {
-            let newElement = selectedElements[selectedElements.length - 1].cloneNode(true)
-            newElement.textContent = lastPortionToTrim
-            newElement.contentEditable = 'true'
-            if (selectedElements[selectedElements.length - 1].nextSibling !== undefined && selectedElements[selectedElements.length - 1].nextSibling !== null) {
-                selectedElements[selectedElements.length - 1].parentElement.insertBefore(newElement, selectedElements[selectedElements.length - 1].nextSibling)
-            } else {
-                selectedElements[selectedElements.length - 1].parentElement.appendChild(newElement)
-            }
-        }
-        selectedElements[0].textContent = firstSelectedText
-        selectedElements[selectedElements.length - 1].textContent = lastSelectedText
-        return { SelectedElements: selectedElements }
-    }
-
     let addContentState = () => {
         let content = document.querySelector('#html-content-editor')
+        let pTags = document.querySelectorAll('#html-content-editor p')
+        pTags.forEach((p) => {
+            p.style.borderBottom = 'none'
+        })
         if (contentIndex === undefined || contentIndex === contentState.length - 1) {
-            contentState.push(content.cloneNode(true))
+            contentState.push({ content: content.cloneNode(true), layoutOptionToggled: layoutOptionToggled })
         } else {
             let newContentState = contentState.filter((content, index) => {
                 return index <= contentIndex
             })
-            newContentState.push(content.cloneNode(true))
+            newContentState.push({ content: content.cloneNode(true), layoutOptionToggled: layoutOptionToggled })
             contentState = newContentState
         }
         contentIndex = contentState.length - 1
@@ -1040,11 +1042,21 @@ document.addEventListener('DOMContentLoaded', () => {
             while (content.firstChild) {
                 content.removeChild(content.lastChild)
             }
-            for (let i = 0; i < contentState[contentIndex - 1].children.length; i++) {
-                content.appendChild(contentState[contentIndex - 1].children[i].cloneNode(true))
+            for (let i = 0; i < contentState[contentIndex - 1].content.children.length; i++) {
+                content.appendChild(contentState[contentIndex - 1].content.children[i].cloneNode(true))
             }
+            layoutOptionToggled = contentState[contentIndex - 1].layoutOptionToggled
             contentIndex = contentIndex - 1
         }
+        let pTags = document.querySelectorAll('#html-content-editor p')
+        pTags.forEach((p) => {
+            p.addEventListener('focusin', () => {
+                p.style.borderBottom = '1px solid rgb(39, 92, 140)'
+            })
+            p.addEventListener('focusout', () => {
+                p.style.borderBottom = 'none'
+            })
+        })
     }
 
     let rollbackInContentState = () => {
@@ -1053,15 +1065,25 @@ document.addEventListener('DOMContentLoaded', () => {
             while (content.firstChild) {
                 content.removeChild(content.lastChild)
             }
-            for (let i = 0; i < contentState[contentIndex + 1].children.length; i++) {
-                content.appendChild(contentState[contentIndex + 1].children[i].cloneNode(true))
+            for (let i = 0; i < contentState[contentIndex + 1].content.children.length; i++) {
+                content.appendChild(contentState[contentIndex + 1].content.children[i].cloneNode(true))
             }
+            layoutOptionToggled = contentState[contentIndex + 1].layoutOptionToggled
             contentIndex = contentIndex + 1
         }
+        let pTags = document.querySelectorAll('#html-content-editor p')
+        pTags.forEach((p) => {
+            p.addEventListener('focusin', () => {
+                p.style.borderBottom = '1px solid rgb(39, 92, 140)'
+            })
+            p.addEventListener('focusout', () => {
+                p.style.borderBottom = 'none'
+            })
+        })
     }
 
     let placeCaretAtEnd = (content) => {
-        if (content === undefined) {
+        if (content === undefined || content === null) {
             return
         }
         content.focus()
@@ -1110,7 +1132,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (selection.StartOffset > 0) {
                 firstTextElement = element.textContent.substring(0, selection.StartOffset)
             }
-            if (selection.EndOffset < element.textContent.length - 1) {
+            if (selection.EndOffset < element.textContent.length) {
                 lastTextElement = element.textContent.substring(selection.EndOffset, element.textContent.length)
             }
             selectedTextElement = element.textContent.substring(selection.StartOffset, selection.EndOffset)
@@ -1158,7 +1180,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 notSelectedElement.innerHTML = notSelectedText.split(' ').join('&nbsp;')
                 firstElement.parentElement.insertBefore(notSelectedElement, firstElement)
             }
-            if (selection.EndOffset < lastElement.textContent.length - 1 && lastElement.textContent.length > 0) {
+            if (selection.EndOffset < lastElement.textContent.length && lastElement.textContent.length > 0) {
                 let notSelectedText = lastElement.textContent.substring(selection.EndOffset, lastElement.textContent.length)
                 let notSelectedElement = lastElement.cloneNode(true)
                 notSelectedElement.textContent = notSelectedText
@@ -1180,11 +1202,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Callback functions
     let policeChangeCallback = (police) => {
+        if (selection === undefined || selection.ActiveElements === undefined || selection.ActiveElements.length <= 0) {
+            return
+        }
         let elementsToChange = truncateSelection()
         if (elementsToChange === undefined || elementsToChange.length <= 0) {
             return
         }
-        elementsToChange.forEach(element => {
+        elementsToChange.forEach((element) => {
             element.style.fontFamily = police
         })
         placeCaretAtEnd(elementsToChange.pop())
@@ -1192,11 +1217,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     let policeSizeChangeCallback = (size) => {
+        if (selection === undefined || selection.ActiveElements === undefined || selection.ActiveElements.length <= 0) {
+            return
+        }
         let elementsToChange = truncateSelection()
         if (elementsToChange === undefined || elementsToChange.length <= 0) {
             return
         }
-        elementsToChange.forEach(element => {
+        elementsToChange.forEach((element) => {
             element.style.fontSize = size
         })
         placeCaretAtEnd(elementsToChange.pop())
@@ -1204,11 +1232,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     let policeColorChangeCallback = (color) => {
+        if (selection === undefined || selection.ActiveElements === undefined || selection.ActiveElements.length <= 0) {
+            return
+        }
         let elementsToChange = truncateSelection()
         if (elementsToChange === undefined || elementsToChange.length <= 0) {
             return
         }
-        elementsToChange.forEach(element => {
+        elementsToChange.forEach((element) => {
             element.style.color = color
         })
         placeCaretAtEnd(elementsToChange.pop())
@@ -1216,11 +1247,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     let policeBoldToggleCallback = () => {
+        if (selection === undefined || selection.ActiveElements === undefined || selection.ActiveElements.length <= 0) {
+            return
+        }
         let elementsToChange = truncateSelection()
         if (elementsToChange === undefined || elementsToChange.length <= 0) {
             return
         }
-        elementsToChange.forEach(element => {
+        elementsToChange.forEach((element) => {
             if (element.style.fontWeight === 'bold') {
                 element.style.fontWeight = 'normal'
                 return
@@ -1232,11 +1266,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     let policeItalicToggleCallback = () => {
+        if (selection === undefined || selection.ActiveElements === undefined || selection.ActiveElements.length <= 0) {
+            return
+        }
         let elementsToChange = truncateSelection()
         if (elementsToChange === undefined || elementsToChange.length <= 0) {
             return
         }
-        elementsToChange.forEach(element => {
+        elementsToChange.forEach((element) => {
             if (element.style.fontStyle === 'italic') {
                 element.style.fontStyle = 'normal'
                 return
@@ -1248,11 +1285,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     let policeUnderlineToggleCallback = () => {
+        if (selection === undefined || selection.ActiveElements === undefined || selection.ActiveElements.length <= 0) {
+            return
+        }
         let elementsToChange = truncateSelection()
         if (elementsToChange === undefined || elementsToChange.length <= 0) {
             return
         }
-        elementsToChange.forEach(element => {
+        elementsToChange.forEach((element) => {
             if (element.style.textDecoration === 'underline') {
                 element.style.textDecoration = 'none'
                 return
@@ -1264,39 +1304,51 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     let policeTextAlignementLeftCallback = () => {
+        if (selection === undefined || selection.ActiveElements === undefined || selection.ActiveElements.length <= 0) {
+            return
+        }
         let container = selection.ActiveElements[0]
         while (container.tagName !== 'P') {
             container = container.parentElement
         }
         container.style.textAlign = 'left'
-        container.parentElement.style.justifyContent = 'flex-start'
+        container.style.justifyContent = 'flex-start'
         placeCaretAtEnd(container.lastChild)
         addContentState()
     }
 
     let policeTextAlignementCenterCallback = () => {
+        if (selection === undefined || selection.ActiveElements === undefined || selection.ActiveElements.length <= 0) {
+            return
+        }
         let container = selection.ActiveElements[0]
         while (container.tagName !== 'P') {
             container = container.parentElement
         }
         container.style.textAlign = 'center'
-        container.parentElement.style.justifyContent = 'center'
+        container.style.justifyContent = 'center'
         placeCaretAtEnd(container.lastChild)
         addContentState()
     }
 
     let policeTextAlignementRightCallback = () => {
+        if (selection === undefined || selection.ActiveElements === undefined || selection.ActiveElements.length <= 0) {
+            return
+        }
         let container = selection.ActiveElements[0]
         while (container.tagName !== 'P') {
             container = container.parentElement
         }
         container.style.textAlign = 'right'
-        container.parentElement.style.justifyContent = 'flex-end'
+        container.style.justifyContent = 'flex-end'
         placeCaretAtEnd(container.lastChild)
         addContentState()
     }
 
     let policeAddIndentCallback = () => {
+        if (selection === undefined || selection.ActiveElements === undefined || selection.ActiveElements.length <= 0) {
+            return
+        }
         let container = selection.ActiveElements[0]
         let sizeIndent = parseInt(indentSize.replace('px', ''))
         while (container.tagName !== 'P') {
@@ -1315,6 +1367,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     let policeRemoveIndentCallback = () => {
+        if (selection === undefined || selection.ActiveElements === undefined || selection.ActiveElements.length <= 0) {
+            return
+        }
         let container = selection.ActiveElements[0]
         let sizeIndent = parseInt(indentSize.replace('px', ''))
         while (container.tagName !== 'P') {
@@ -1335,96 +1390,230 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     let policeAddNumberedListCallback = () => {
-        let selection = getSelection()
-        let numberedList = document.createElement('ol')
-        let firstElement = document.createElement('li')
-        let mainContent = document.querySelector('#html-content-editor')
-        numberedList.style.display = 'flex'
-        numberedList.style.flexDirection = 'column'
-        numberedList.contentEditable = 'true'
-        numberedList.appendChild(firstElement)
-        if (selection.SelectedElements.length > 0) {
-            let container = selection.SelectedElements.pop().parentElement
-            if (mainContent.children.length <= 0) {
-                mainContent.appendChild(numberedList)
-                placeCaretAtEnd(firstElement)
-                return
-            }
-            if (container.nextSibling !== undefined && container.nextSibling !== null) {
-                mainContent.insertBefore(numberedList, container.nextSibling)
-                placeCaretAtEnd(firstElement)
-                return
-            }
-            mainContent.appendChild(numberedList)
-            placeCaretAtEnd(firstElement)
+        if (selection === undefined || selection.ActiveElements === undefined || selection.ActiveElements.length <= 0) {
             return
         }
-        mainContent.appendChild(numberedList)
-        placeCaretAtEnd(firstElement)
+        let container = selection.ActiveElements[0]
+        let addContainer = false
+        while (container.tagName !== 'P') {
+            container = container.parentElement
+        }
+        if (container.children[0] !== undefined && container.children.length === 1 && container.children[0].tagName === 'BR') {
+            container.removeChild(container.children[0])
+        } else if (container.children.length > 1 || (container.children.length === 1 && container.children[0].textContent.length > 0)) {
+            addContainer = true
+        }
+        let mainContainer = addContainer ? document.createElement('div') : container.parentElement
+        let numberedList = addContainer ? document.createElement('p') : container
+        let firstElement = addContainer ? document.createElement('somum-custom-style') : container.firstChild
+        let mainContent = document.querySelector('#html-content-editor')
+        let itterator = document.createElement('somum-counter')
+        let mainContentWidth = parseInt(mainContent.style.width.replace('px', '')) - 14
+        numberedList.contentEditable = 'true'
+        mainContainer.setAttribute('isnumberedlist', 'true')
+        if (!addContainer) {
+            numberedList.removeChild(numberedList.lastChild)
+        }
+        numberedList.appendChild(itterator)
+        if (addContainer) {
+            if (container.parentElement.nextSibling !== undefined && container.parentElement.nextSibling !== null) {
+                mainContent.insertBefore(mainContainer, container.parentElement.nextSibling)
+            } else {
+                mainContent.appendChild(mainContainer)
+            }
+            mainContainer.appendChild(numberedList)
+            numberedList.appendChild(firstElement)
+        }
+        numberedList.appendChild(firstElement)
+        numberedList.style.paddingLeft = '15px'
+        numberedList.style.display = 'flex'
+        numberedList.setAttribute('counter', '1')
+        itterator.contentEditable = 'false'
+        itterator.innerHTML = '1.&nbsp;'
+        mainContainer.style.display = 'flex'
+        mainContainer.style.flexDirection = 'column'
+        mainContainer.style.minHeight = '20px'
+        mainContainer.style.width = `${mainContentWidth}px`
+        mainContainer.style.maxWidth = `${mainContentWidth}px`
+        numberedList.style.width = `${mainContentWidth}px`
+        numberedList.style.maxWidth = `${mainContentWidth}px`
+        numberedList.style.cursor = 'text'
+        numberedList.style.outline = 'none'
+        numberedList.style.minHeight = '20px'
+        numberedList.addEventListener('focusin', () => {
+            numberedList.style.borderBottom = '1px solid rgb(39, 92, 140)'
+        })
+        numberedList.addEventListener('focusout', () => {
+            numberedList.style.borderBottom = 'none'
+        })
         addContentState()
     }
 
     let policeAddOrderedListCallback = () => {
-        let selection = getSelection()
-        let orderedList = document.createElement('ul')
-        let firstElement = document.createElement('li')
-        let mainContent = document.querySelector('#html-content-editor')
-        orderedList.style.display = 'flex'
-        orderedList.style.flexDirection = 'column'
-        orderedList.contentEditable = 'true'
-        orderedList.appendChild(firstElement)
-        if (selection.SelectedElements.length > 0) {
-            let container = selection.SelectedElements.pop().parentElement
-            if (mainContent.children.length <= 0) {
-                mainContent.appendChild(orderedList)
-                placeCaretAtEnd(firstElement)
-                return
-            }
-            if (container.nextSibling !== undefined && container.nextSibling !== null) {
-                mainContent.insertBefore(orderedList, container.nextSibling)
-                placeCaretAtEnd(firstElement)
-                return
-            }
-            mainContent.appendChild(orderedList)
-            placeCaretAtEnd(firstElement)
+        if (selection === undefined || selection.ActiveElements === undefined || selection.ActiveElements.length <= 0) {
             return
         }
-        mainContent.appendChild(orderedList)
-        placeCaretAtEnd(firstElement)
+        let container = selection.ActiveElements[0]
+        let addContainer = false
+        while (container.tagName !== 'P') {
+            container = container.parentElement
+        }
+        if (container.children[0] !== undefined && container.children.length === 1 && container.children[0].tagName === 'BR') {
+            container.removeChild(container.children[0])
+        } else if (container.children.length > 1 || (container.children.length === 1 && container.children[0].textContent.length > 0)) {
+            addContainer = true
+        }
+        let mainContainer = addContainer ? document.createElement('div') : container.parentElement
+        let orderedList = addContainer ? document.createElement('p') : container
+        let firstElement = addContainer ? document.createElement('somum-custom-style') : container.firstChild
+        let mainContent = document.querySelector('#html-content-editor')
+        let itterator = document.createElement('somum-counter')
+        let mainContentWidth = parseInt(mainContent.style.width.replace('px', '')) - 14
+        orderedList.contentEditable = 'true'
+        orderedList.style.display = 'flex'
+        mainContainer.setAttribute('isorderedlist', 'true')
+        if (!addContainer) {
+            orderedList.removeChild(orderedList.lastChild)
+        }
+        orderedList.appendChild(itterator)
+        if (addContainer) {
+            if (container.parentElement.nextSibling !== undefined && container.parentElement.nextSibling !== null) {
+                mainContent.insertBefore(mainContainer, container.parentElement.nextSibling)
+            } else {
+                mainContent.appendChild(mainContainer)
+            }
+            mainContainer.appendChild(orderedList)
+            orderedList.appendChild(firstElement)
+        }
+        orderedList.appendChild(firstElement)
+        orderedList.style.paddingLeft = '15px'
+        itterator.contentEditable = 'false'
+        itterator.innerHTML = '&bull;&nbsp;'
+        mainContainer.style.display = 'flex'
+        mainContainer.style.flexDirection = 'column'
+        mainContainer.style.minHeight = '20px'
+        mainContainer.style.width = `${mainContentWidth}px`
+        mainContainer.style.maxWidth = `${mainContentWidth}px`
+        orderedList.style.width = `${mainContentWidth}px`
+        orderedList.style.maxWidth = `${mainContentWidth}px`
+        orderedList.style.cursor = 'text'
+        orderedList.style.outline = 'none'
+        orderedList.style.minHeight = '20px'
+        orderedList.addEventListener('focusin', () => {
+            orderedList.style.borderBottom = '1px solid rgb(39, 92, 140)'
+        })
+        orderedList.addEventListener('focusout', () => {
+            orderedList.style.borderBottom = 'none'
+        })
         addContentState()
     }
 
     let addImageCallback = (image) => {
-        let selection = getSelection()
+        if (selection === undefined || selection.ActiveElements === undefined || selection.ActiveElements.length <= 0) {
+            return
+        }
+        let container = selection.ActiveElements[0]
+        let addContainer = false
+        while (container.tagName !== 'P') {
+            container = container.parentElement
+        }
+        if (container.children[0] !== undefined && container.children.length === 1 && container.children[0].tagName === 'BR') {
+            container.removeChild(container.children[0])
+        } else if (container.children.length > 1 || (container.children.length === 1 && container.children[0].textContent.length > 0)) {
+            addContainer = true
+        }
         let mainContent = document.querySelector('#html-content-editor')
-        let imageContainer = document.createElement('div')
+        let mainContentWidth = parseInt(mainContent.style.width.replace('px', '')) - 14
+        let imageContainer = addContainer ? document.createElement('div') : container.parentElement
+        let mainContainer = addContainer ? document.createElement('p') : container
+        let firstContent = document.createElement('somum-custom-style')
         let imageToAdd = document.createElement('img')
+        if (addContainer) {
+            if (container.parentElement.nextSibling !== undefined && container.parentElement.nextSibling !== null) {
+                mainContent.insertBefore(imageContainer, container.parentElement.nextSibling)
+            } else {
+                mainContent.appendChild(imageContainer)
+            }
+            imageContainer.appendChild(mainContainer)
+        } else {
+            mainContainer.removeChild(mainContainer.firstChild)
+        }
+        mainContainer.appendChild(firstContent)
         imageContainer.style.display = 'flex'
         imageContainer.style.flexWrap = 'wrap'
-        imageContainer.contentEditable = 'true'
+        mainContainer.contentEditable = 'true'
+        mainContainer.style.display = ''
+        imageContainer.style.width = `${mainContentWidth}px`
+        imageContainer.style.maxWidth = `${mainContentWidth}px`
+        imageContainer.setAttribute('isimagecontainer', 'true')
         imageToAdd.src = image
-        imageContainer.appendChild(imageToAdd)
-        if (selection.SelectedElements.length <= 0) {
-            mainContent.appendChild(imageContainer)
-            return
+        imageToAdd.style.maxWidth = `${mainContentWidth / 2}px`
+        imageToAdd.onload = () => {
+            imageContainer.style.minHeight = `${imageToAdd.height + 5}px`
         }
-        let container
-        let currentNode = selection.SelectedElements.pop()
-        while (container === undefined) {
-            if (currentNode.tagName === 'DIV') {
-                container = currentNode
-            }
-            currentNode = currentNode.parentElement
-        }
-        if (container.nextSibling === null || container.nextSibling === undefined) {
-            mainContent.insertBefore(imageContainer, container.nextSibling)
-            placeCaretAtEnd(imageContainer)
-            addContentState()
-            return
-        }
-        mainContent.appendChild(imageContainer)
-        placeCaretAtEnd(imageContainer)
+        firstContent.appendChild(imageToAdd)
         addContentState()
+    }
+
+    let initializeContentInTextMode = (container, mainContainer) => {
+        let firstContainer = document.createElement('div')
+        let firstParagraph = document.createElement('p')
+        let firstStyle = document.createElement('somum-custom-style')
+        let containerWidth = parseInt(mainContainer.style.width.replace('px', '')) - 14
+        firstContainer.style.display = 'flex'
+        firstContainer.style.flexDirection = 'column'
+        firstContainer.style.minHeight = '20px'
+        firstContainer.style.maxWidth = `${containerWidth}px`
+        firstContainer.style.width = `${containerWidth}px`
+
+        firstParagraph.contentEditable = 'true'
+        firstParagraph.style.width = firstContainer.style.width
+        firstParagraph.style.maxWidth = firstContainer.style.width
+        firstParagraph.style.minHeight = '20px'
+        firstParagraph.style.cursor = 'text'
+        firstParagraph.style.outline = 'none'
+        firstParagraph.style.display = 'flex'
+        firstParagraph.addEventListener('focusin', () => {
+            firstParagraph.style.borderBottom = '1px solid rgb(39, 92, 140)'
+        })
+        firstParagraph.addEventListener('focusout', () => {
+            firstParagraph.style.borderBottom = 'none'
+        })
+
+        firstStyle.style.minHeight = '20px'
+
+        firstContainer.appendChild(firstParagraph)
+        firstParagraph.appendChild(firstStyle)
+        container.appendChild(firstContainer)
+    }
+
+    let initializeContentInLayoutMode = (container) => {
+        let mainContainer = document.createElement('div')
+        let header = document.createElement('div')
+        let body = document.createElement('div')
+        let footer = document.createElement('div')
+        initializeContentInTextMode(header, container)
+        initializeContentInTextMode(body, container)
+        initializeContentInTextMode(footer, container)
+        mainContainer.appendChild(header)
+        mainContainer.appendChild(body)
+        mainContainer.appendChild(footer)
+        container.appendChild(mainContainer)
+        header.addEventListener('mouseover', () => {
+            layoutSelected = header
+        })
+        body.addEventListener('mouseover', () => {
+            layoutSelected = body
+        })
+        footer.addEventListener('mouseover', () => {
+            layoutSelected = footer
+        })
+        mainContainer.addEventListener('mouseout', () => {
+            layoutSelected = undefined
+        })
+        header.style.backgroundColor = 'lightgray'
+        body.style.backgroundColor = 'rgba(0, 0, 0, 0.1)'
+        footer.style.backgroundColor = 'lightgray'
     }
 
     // Initialization function
@@ -1432,14 +1621,13 @@ document.addEventListener('DOMContentLoaded', () => {
         let head = document.getElementsByTagName('HEAD')[0]
         let style = document.createElement('style')
         let googleMaterial = document.createElement('link')
+        let robotoFont = document.createElement('link')
         let root = document.querySelector('#' + mainRoot)
         let toolbar = document.createElement('div')
         let policeModificationContainer = document.createElement('div')
         let imageOptionsContainer = document.createElement('div')
         let actionRevokersContainer = document.createElement('div')
         let content = document.createElement('div')
-        let firstContainer = document.createElement('div')
-        let firstParagraph = document.createElement('p')
         let policeSelection,
             sizeSelection,
             colorSelection,
@@ -1453,7 +1641,8 @@ document.addEventListener('DOMContentLoaded', () => {
             imageSelection,
             undoSelection,
             redoSelection,
-            morePoliceOptionsSelection
+            morePoliceOptionsSelection,
+            layoutOption
         screenWidth = window.screen.width
         style.type = 'text/css'
         style.innerHTML = `
@@ -1482,19 +1671,30 @@ document.addEventListener('DOMContentLoaded', () => {
             border-bottom: 1px solid;
             border-color: #275C8C;
         }
+        div[isnumberedlist=\'true\'] { 
+            counter-reset: item
+        }
+        div[isOrderedList=\'true\'] p:before { 
+            content: counter(item) + ". "
+        }
         input,
         textarea,
         div[contenteditable=\'true\'] {
             -webkit-user-select: text;
             user-select: text;
         }
-        #${mainRoot} * {
+        #{mainRoot} * {
             box-sizing: border-box;
         }`
         googleMaterial.rel = 'stylesheet'
         googleMaterial.type = 'text/css'
         googleMaterial.href = 'https://fonts.googleapis.com/icon?family=Material+Icons'
+        robotoFont.rel = 'stylesheet'
+        robotoFont.type = 'text/css'
+        robotoFont.href = 'https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap'
+
         head.appendChild(googleMaterial)
+        head.appendChild(robotoFont)
         head.appendChild(style)
 
         toolbar.id = 'toolbar'
@@ -1542,7 +1742,7 @@ document.addEventListener('DOMContentLoaded', () => {
         content.style.backgroundColor = 'white'
         content.style.width = '631px'
         content.style.display = 'flex'
-        content.style.flexWrap = 'wrap'
+        content.style.flexWrap = 'nowrap'
         content.style.flexDirection = 'column'
         content.style.justifyContent = 'flex-start'
         content.style.alignItems = 'flex-start'
@@ -1559,7 +1759,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else if (activeSelection.anchorNode.tagName === 'P') {
                     activeTag = activeSelection.anchorNode.lastChild
                 }
-                if (activeTag !== undefined && activeTag !== null && (activeTag.tagName === 'SOMUM-CUSTOM-STYLE' || activeTag.tagName === 'LI')) {
+                if (activeTag !== undefined && activeTag !== null && activeTag.tagName === 'SOMUM-CUSTOM-STYLE') {
                     selection = {
                         ActiveElements: [activeTag],
                         HasSelection: false,
@@ -1581,7 +1781,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 secondNode = activeSelection.focusNode
             }
-            if (firstNode === secondNode) {
+            if (firstNode === secondNode && activeSelection.anchorNode === activeSelection.focusNode && firstNode.tagName === 'SOMUM-CUSTOM-STYLE') {
                 selection = {
                     ActiveElements: [firstNode],
                     HasSelection: true,
@@ -1591,7 +1791,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 return
             }
             let container = firstNode.parentElement
-            console.log(container.children)
             let firstNodeIndex
             let secondNodeIndex
             for (let i = 0; i < container.children.length; i++) {
@@ -1604,81 +1803,448 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (firstNodeIndex !== undefined && secondNodeIndex !== undefined) {
                     break
                 }
-                if (container.children[i].tagName === 'UL' || container.children[i].tagName === 'OL') {
-                    for (let j = 0; j < container.children[i].children.length; j++) {
-                        for (let k = 0; k < container.children[i].children[j].children.length; k++) {
-                            if (container.children[i].children[j].children[k] === firstNode) {
-                                firstNodeIndex = i
-                            }
-                            if (container.children[i].children[j].children[k] === secondNode) {
-                                secondNodeIndex = i
-                            }
-                            if (firstNodeIndex !== undefined && secondNodeIndex !== undefined) {
-                                break
-                            }
-                        }
-                    }
-                }
             }
             let listOfElements = []
             let startPoint = firstNodeIndex < secondNodeIndex ? firstNodeIndex : secondNodeIndex
             let endPoint = firstNodeIndex < secondNodeIndex ? secondNodeIndex : firstNodeIndex
             let lastElement = firstNodeIndex < secondNodeIndex ? secondNode : firstNode
             let lastElementFound = false
+            let startOffset
+            let endOffset
             for (let i = startPoint; i <= endPoint; i++) {
-                if (container.children[i].tagName !== 'OL' && container.children[i].tagName !== 'UL') {
+                if (container.children[i].tagName === 'SOMUM-CUSTOM-STYLE') {
                     listOfElements.push(container.children[i])
-                } else {
-                    for (let j = 0; j < container.children[i].children.length; j++) {
-                        for (let k = 0; k < container.children[i].children[j].children.length; k++) {
-                            listOfElements.push(container.children[i].children[j])
-                            if (container.children[i].children[j].children[k] === lastElement) {
-                                lastElementFound = true
-                                break
-                            }
-                        }
-                        if (lastElementFound) {
-                            break
-                        }
-                    }
                 }
+                if (container.children[i].tagName !== 'SOMUM-CUSTOM-STYLE' && i === startPoint) {
+                    startOffset = 0
+                }
+                if (container.children[i].tagName !== 'SOMUM-CUSTOM-STYLE' && i === endPoint) {
+                    endOffset = container.children[i - 1].textContent.length
+                }
+            }
+            startOffset = startOffset !== undefined ? startOffset : firstNodeIndex < secondNodeIndex ? activeSelection.anchorOffset : activeSelection.focusOffset
+            endOffset = endOffset !== undefined ? endOffset : firstNodeIndex < secondNodeIndex ? activeSelection.focusOffset : activeSelection.anchorOffset
+            if (listOfElements.length <= 0) {
+                return
             }
             selection = {
                 ActiveElements: listOfElements,
                 HasSelection: true,
-                StartOffset: firstNodeIndex < secondNodeIndex ? activeSelection.anchorOffset : activeSelection.focusOffset,
-                EndOffset: firstNodeIndex < secondNodeIndex ? activeSelection.focusOffset : activeSelection.anchorOffset,
+                StartOffset: startOffset,
+                EndOffset: endOffset,
             }
             return
         })
 
         content.addEventListener('keydown', (event) => {
-            console.log(event)
             let activeSelection = window.getSelection()
             let activeElement = activeSelection.anchorNode
             let newValue = event.key
-            if (newValue.length === 1) {
-                if (activeElement.tagName === undefined) {
-                    activeElement = activeElement.parentElement
-                }
+            if (activeElement.tagName === undefined) {
+                activeElement = activeElement.parentElement
+            }
+            if (activeElement.tagName === 'P') {
+                activeElement = activeElement.lastChild
+                placeCaretAtEnd(activeElement)
+            }
+            let container = activeElement
+            while (container.tagName !== 'P') {
+                container = container.parentElement
+            }
+            let isParentNumberedList = container.parentElement.getAttribute('isnumberedlist') === null ? false : true
+            let isParentOrderedList = container.parentElement.getAttribute('isorderedlist') === null ? false : true
+            let isParentImageContainer = container.parentElement.getAttribute('isimagecontainer') === null ? false : true
+            if (newValue.length === 1 && !isParentImageContainer && !event.ctrlKey) {
                 if (activeElement.tagName === 'P' && activeElement.children.length > 0 && activeElement.lastChild.tagName === 'SOMUM-CUSTOM-STYLE') {
                     event.preventDefault()
                     activeElement.lastChild.textContent = activeElement.lastChild.textContent + newValue.split(' ').join('&nbsp;')
                     placeCaretAtEnd(activeElement.lastChild)
+                    addContentState()
                 } else if (activeElement.tagName === 'P' && (activeElement.children.length <= 0 || (activeElement.children[0] !== undefined && activeElement.children[0].tagName === 'BR'))) {
                     event.preventDefault()
                     if (activeElement.children[0] !== undefined) {
                         activeElement.removeChild(activeElement.children[0])
                     }
                     let firstElement = document.createElement('somum-custom-style')
-                    firstElement.style.minHeight = '18px'
-                    firstElement.textContent = newValue.split(' ').join('&nbsp;')
+                    firstElement.style.minHeight = '20px'
+                    firstElement.textContent = newValue.split(' ').join(' ')
+                    firstElement.innerHTML = newValue.split(' ').join('&nbsp;')
                     activeElement.appendChild(firstElement)
                     placeCaretAtEnd(firstElement)
-                } else if (activeElement.tagName !== 'SOMUM-CUSTOM-STYLE') {
-                    let i = 0
+                    addContentState()
+                } else if (activeElement.tagName === 'SOMUM-CUSTOM-STYLE' && activeElement.textContent.length <= 0 && activeElement.innerHTML.length <= 0) {
+                    event.preventDefault()
+                    activeElement.textContent = newValue.split(' ').join(' ')
+                    activeElement.innerHTML = newValue.split(' ').join('&nbsp;')
+                    placeCaretAtEnd(activeElement)
                 }
+            } else if (newValue === 'Backspace') {
+                if (activeElement.tagName === 'SOMUM-CUSTOM-STYLE') {
+                    if (activeSelection.type === 'Caret') {
+                        if (!isParentImageContainer && !isParentNumberedList && !isParentOrderedList) {
+                            if (activeElement.parentElement.children.length === 1 && activeElement.textContent.length === 1) {
+                                event.preventDefault()
+                                activeElement.textContent = ''
+                                placeCaretAtEnd(activeElement)
+                            } else if (activeElement.parentElement.children.length === 1 && activeElement.textContent.length <= 0) {
+                                event.preventDefault()
+                                let container = activeElement.parentElement.parentElement
+                                let mainContainer = container.parentElement
+                                if (mainContainer.children.length <= 1) {
+                                    return
+                                }
+                                let containerSibling = container.previousSibling
+                                mainContainer.removeChild(container)
+                                placeCaretAtEnd(containerSibling.lastChild)
+                            }
+                        } else if (isParentImageContainer) {
+                            let image = container.getElementsByTagName('img')[0]
+                            if (image === undefined || image === null) {
+                                event.preventDefault()
+                                return
+                            }
+                            let imageContainer = image.parentElement
+                            if (imageContainer.textContent.length > 0) {
+                                return
+                            }
+                            event.preventDefault()
+                            imageContainer.removeChild(image)
+                            container.parentElement.removeAttribute('isimagecontainer')
+                            container.parentElement.style.minHeight = '20px'
+                            placeCaretAtEnd(imageContainer)
+                        } else if (isParentNumberedList || isParentOrderedList) {
+                            let mainStructure = container.parentElement.parentElement
+                            if (container.lastChild.tagName === 'SOMUM-CUSTOM-STYLE' && container.lastChild.textContent.length <= 0 && container.children.length === 2) {
+                                event.preventDefault()
+                                if (isParentNumberedList) {
+                                    let actualCount = parseInt(container.getAttribute('counter'))
+                                    let elementCountBuffer
+                                    for (let i = actualCount - 1; i < container.parentElement.children.length; i++) {
+                                        elementCountBuffer = parseInt(container.parentElement.children[i].getAttribute('counter'))
+                                        --elementCountBuffer
+                                        container.parentElement.children[i].firstChild.textContent = `${elementCountBuffer}. `
+                                        container.parentElement.children[i].firstChild.innerHTML = `${elementCountBuffer}.&nbsp;`
+                                        container.parentElement.children[i].setAttribute('counter', elementCountBuffer)
+                                    }
+                                }
+                                if (container.previousSibling !== undefined && container.previousSibling !== null) {
+                                    placeCaretAtEnd(container.previousSibling)
+                                } else if (container.nextSibling !== undefined && container.nextSibling !== null) {
+                                    placeCaretAtEnd(container.nextSibling)
+                                }
+                                if (mainStructure.children.length >= 1 && container.parentElement.children.length > 1) {
+                                    if (container.parentElement.lastChild === container) {
+                                        let mainContainer = container.parentElement
+                                        let mainContainerSibling = mainContainer.nextSibling
+                                        let newMainContainer = document.createElement('div')
+                                        let newContainer = document.createElement('p')
+                                        let newElement = document.createElement('somum-custom-style')
+                                        let containerWidth = parseInt(content.style.width.replace('px', '')) - 14
+                                        newMainContainer.style.display = 'flex'
+                                        newMainContainer.style.flexDirection = 'column'
+                                        newMainContainer.style.minHeight = '20px'
+                                        newMainContainer.style.maxWidth = `${containerWidth}px`
+                                        newMainContainer.style.width = `${containerWidth}px`
+
+                                        newContainer.contentEditable = 'true'
+                                        newContainer.style.width = newMainContainer.style.width
+                                        newContainer.style.maxWidth = newMainContainer.style.width
+                                        newContainer.style.minHeight = '20px'
+                                        newContainer.style.cursor = 'text'
+                                        newContainer.style.outline = 'none'
+                                        newContainer.style.display = 'flex'
+                                        newContainer.addEventListener('focusin', () => {
+                                            newContainer.style.borderBottom = '1px solid rgb(39, 92, 140)'
+                                        })
+                                        newContainer.addEventListener('focusout', () => {
+                                            newContainer.style.borderBottom = 'none'
+                                        })
+
+                                        newElement.style.minHeight = '20px'
+                                        newContainer.appendChild(newElement)
+                                        newMainContainer.appendChild(newContainer)
+                                        if (mainContainerSibling !== undefined && mainContainerSibling !== null) {
+                                            mainStructure.insertBefore(newMainContainer, mainContainerSibling)
+                                        } else {
+                                            mainStructure.appendChild(newMainContainer)
+                                        }
+                                        placeCaretAtEnd(newElement)
+                                    }
+                                    container.parentElement.removeChild(container)
+                                } else if (
+                                    (mainStructure.children.length === 1 && container.parentElement.children.length === 1) ||
+                                    (mainStructure.children.length > 1 && container.parentElement.children.length === 1)
+                                ) {
+                                    container.parentElement.removeAttribute('isnumberedlist')
+                                    container.parentElement.removeAttribute('isorderedlist')
+                                    container.removeAttribute('counter')
+                                    container.removeChild(container.firstChild)
+                                    container.style.paddingLeft = '0'
+                                    placeCaretAtEnd(container.firstChild)
+                                }
+                            }
+                        }
+                    } else {
+                        if (!isParentImageContainer) {
+                            event.preventDefault()
+                            if (selection.ActiveElements.length <= 0) {
+                                return
+                            }
+                            if (selection.ActiveElements.length > 1) {
+                                let remainingText = selection.ActiveElements[0].textContent.substring(0, selection.StartOffset)
+                                if (remainingText.length <= 0) {
+                                    selection.ActiveElements[0].parentElement.removeChild(selection.ActiveElements[0])
+                                }
+                                selection.ActiveElements[0].textContent = remainingText
+                                selection.ActiveElements[0].innerHTML = remainingText.split(' ').join('&nbsp;')
+                                remainingText = selection.ActiveElements[selection.ActiveElements.length - 1].textContent.substring(
+                                    selection.EndOffset,
+                                    selection.ActiveElements[selection.ActiveElements.length - 1].textContent.length
+                                )
+                                if (remainingText.length <= 0) {
+                                    selection.ActiveElements[selection.ActiveElements.length - 1].parentElement.removeChild(selection.ActiveElements[selection.ActiveElements.length - 1])
+                                }
+                                selection.ActiveElements[selection.ActiveElements.length - 1].textContent = remainingText
+                                selection.ActiveElements[selection.ActiveElements.length - 1].textContent = remainingText.split(' ').join('&nbsp;')
+                                for (let i = 1; i < selection.ActiveElements.length - 1; i++) {
+                                    selection.ActiveElements[i].parentElement.removeChild(selection.ActiveElements[i])
+                                }
+                            } else {
+                                let firstPart = selection.ActiveElements[0].textContent.substring(0, selection.StartOffset)
+                                let lastPart = selection.ActiveElements[0].textContent.substring(selection.EndOffset, selection.ActiveElements[0].textContent.length)
+                                let remainingText = firstPart + lastPart
+                                if (remainingText.length <= 0) {
+                                    selection.ActiveElements[0].parentElement.removeChild(selection.ActiveElements[0])
+                                }
+                                selection.ActiveElements[0].textContent = remainingText
+                                selection.ActiveElements[0].innerHTML = remainingText.split(' ').join('&nbsp;')
+                            }
+
+                            if (container.children.length <= 0 || ((isParentNumberedList || isParentOrderedList) && container.children.length === 1)) {
+                                let newStyle = document.createElement('somum-custom-style')
+                                newStyle.style.minHeight = '20px'
+                                container.appendChild(newStyle)
+                                placeCaretAtEnd(newStyle)
+                            } else {
+                                placeCaretAtEnd(selection.ActiveElements[0])
+                            }
+                        } else if (isParentImageContainer) {
+                            let image = container.getElementsByTagName('img')[0]
+                            if (image === undefined || image === null) {
+                                event.preventDefault()
+                                return
+                            }
+                            let imageContainer = image.parentElement
+                            if (imageContainer.textContent.length > 0) {
+                                return
+                            }
+                            event.preventDefault()
+                            imageContainer.removeChild(image)
+                            container.parentElement.removeAttribute('isimagecontainer')
+                            container.parentElement.style.minHeight = '20px'
+                            placeCaretAtEnd(imageContainer)
+                        }
+                    }
+                } else {
+                    event.preventDefault()
+                }
+            } else if (newValue === 'Enter') {
+                event.preventDefault()
+                if (!isParentNumberedList && !isParentOrderedList) {
+                    let mainContainer = container.parentElement
+                    let mainStructure = mainContainer.parentElement
+                    let mainContainerSibling = mainContainer.nextSibling
+                    let newMainContainer = document.createElement('div')
+                    let newContainer = document.createElement('p')
+                    let newElement = document.createElement('somum-custom-style')
+                    let containerWidth = parseInt(content.style.width.replace('px', '')) - 14
+                    newMainContainer.style.display = 'flex'
+                    newMainContainer.style.flexDirection = 'column'
+                    newMainContainer.style.minHeight = '20px'
+                    newMainContainer.style.maxWidth = `${containerWidth}px`
+                    newMainContainer.style.width = `${containerWidth}px`
+
+                    newContainer.contentEditable = 'true'
+                    newContainer.style.width = newMainContainer.style.width
+                    newContainer.style.maxWidth = newMainContainer.style.width
+                    newContainer.style.minHeight = '20px'
+                    newContainer.style.cursor = 'text'
+                    newContainer.style.outline = 'none'
+                    newContainer.style.display = 'flex'
+                    newContainer.addEventListener('focusin', () => {
+                        newContainer.style.borderBottom = '1px solid rgb(39, 92, 140)'
+                    })
+                    newContainer.addEventListener('focusout', () => {
+                        newContainer.style.borderBottom = 'none'
+                    })
+
+                    newElement.style.minHeight = '20px'
+                    newContainer.appendChild(newElement)
+                    newMainContainer.appendChild(newContainer)
+                    if (mainContainerSibling !== undefined && mainContainerSibling !== null) {
+                        mainStructure.insertBefore(newMainContainer, mainContainerSibling)
+                    } else {
+                        mainStructure.appendChild(newMainContainer)
+                    }
+                    placeCaretAtEnd(newElement)
+                } else if (isParentNumberedList || isParentOrderedList) {
+                    if (container.lastChild.tagName === 'SOMUM-CUSTOM-STYLE' && container.lastChild.textContent.length <= 0 && container.children.length === 2) {
+                        if (isParentNumberedList) {
+                            let actualCount = parseInt(container.getAttribute('counter'))
+                            let elementCountBuffer
+                            for (let i = actualCount - 1; i < container.parentElement.children.length; i++) {
+                                elementCountBuffer = parseInt(container.parentElement.children[i].getAttribute('counter'))
+                                --elementCountBuffer
+                                container.parentElement.children[i].firstChild.textContent = `${elementCountBuffer}. `
+                                container.parentElement.children[i].firstChild.innerHTML = `${elementCountBuffer}.&nbsp;`
+                                container.parentElement.children[i].setAttribute('counter', elementCountBuffer)
+                            }
+                        }
+                        if (container.previousSibling !== undefined && container.previousSibling !== null) {
+                            placeCaretAtEnd(container.previousSibling)
+                        } else if (container.nextSibling !== undefined && container.nextSibling !== null) {
+                            placeCaretAtEnd(container.nextSibling)
+                        } else if (container.parentElement.previousSibling !== undefined && container.parentElement.previousSibling !== null) {
+                            placeCaretAtEnd(container.parentElement.previousSibling)
+                        } else if (container.parentElement.nextElementSibling !== undefined && container.parentElement.nextElementSibling !== null) {
+                            placeCaretAtEnd(container.parentElement.nextElementSibling)
+                        }
+                        if (content.children.length >= 1 && container.parentElement.children.length > 1) {
+                            if (container.parentElement.lastChild === container) {
+                                let mainContainer = container.parentElement
+                                let mainStructure = mainContainer.parentElement
+                                let mainContainerSibling = mainContainer.nextSibling
+                                let newMainContainer = document.createElement('div')
+                                let newContainer = document.createElement('p')
+                                let newElement = document.createElement('somum-custom-style')
+                                let containerWidth = parseInt(content.style.width.replace('px', '')) - 14
+                                newMainContainer.style.display = 'flex'
+                                newMainContainer.style.flexDirection = 'column'
+                                newMainContainer.style.minHeight = '20px'
+                                newMainContainer.style.maxWidth = `${containerWidth}px`
+                                newMainContainer.style.width = `${containerWidth}px`
+
+                                newContainer.contentEditable = 'true'
+                                newContainer.style.width = newMainContainer.style.width
+                                newContainer.style.maxWidth = newMainContainer.style.width
+                                newContainer.style.minHeight = '20px'
+                                newContainer.style.cursor = 'text'
+                                newContainer.style.outline = 'none'
+                                newContainer.style.display = 'flex'
+                                newContainer.addEventListener('focusin', () => {
+                                    newContainer.style.borderBottom = '1px solid rgb(39, 92, 140)'
+                                })
+                                newContainer.addEventListener('focusout', () => {
+                                    newContainer.style.borderBottom = 'none'
+                                })
+
+                                newElement.style.minHeight = '20px'
+                                newContainer.appendChild(newElement)
+                                newMainContainer.appendChild(newContainer)
+                                if (mainContainerSibling !== undefined && mainContainerSibling !== null) {
+                                    mainStructure.insertBefore(newMainContainer, mainContainerSibling)
+                                } else {
+                                    mainStructure.appendChild(newMainContainer)
+                                }
+                                placeCaretAtEnd(newElement)
+                            }
+                            container.parentElement.removeChild(container)
+                        } else if (mainStructure.children.length > 1 && container.parentElement.children.length === 1) {
+                            mainStructure.removeChild(container.parentElement)
+                        } else if (mainStructure.children.length === 1 && container.parentElement.children.length === 1) {
+                            container.parentElement.removeAttribute('isnumberedlist')
+                            container.parentElement.removeAttribute('isorderedlist')
+                            container.removeAttribute('counter')
+                            container.removeChild(container.firstChild)
+                            container.style.paddingLeft = '0'
+                            placeCaretAtEnd(container.firstChild)
+                        }
+                    } else if (
+                        (container.lastChild.tagName === 'SOMUM-CUSTOM-STYLE' && container.lastChild.textContent.length > 0 && container.children.length === 2) ||
+                        (container.lastChild.tagName === 'SOMUM-CUSTOM-STYLE' && container.children.length > 2)
+                    ) {
+                        let newContainer = document.createElement('p')
+                        let newCounter = document.createElement('somum-counter')
+                        let newStyle = document.createElement('somum-custom-style')
+
+                        let mainContentWidth = parseInt(content.style.width.replace('px', '')) - 14
+                        if (isParentNumberedList) {
+                            let actualCount = parseInt(container.getAttribute('counter'))
+                            newContainer.setAttribute('counter', actualCount + 1)
+                            newCounter.innerHTML = `${actualCount + 1}.&nbsp;`
+                            ++actualCount
+                            let elementCountBuffer
+                            for (let i = actualCount - 1; i < container.parentElement.children.length; i++) {
+                                elementCountBuffer = parseInt(container.parentElement.children[i].getAttribute('counter'))
+                                ++elementCountBuffer
+                                container.parentElement.children[i].firstChild.textContent = `${elementCountBuffer}. `
+                                container.parentElement.children[i].firstChild.innerHTML = `${elementCountBuffer}.&nbsp;`
+                                container.parentElement.children[i].setAttribute('counter', elementCountBuffer)
+                            }
+                        } else {
+                            newCounter.innerHTML = '&bull;&nbsp;'
+                        }
+                        newContainer.contentEditable = 'true'
+                        newContainer.appendChild(newCounter)
+                        newContainer.appendChild(newStyle)
+                        newContainer.style.paddingLeft = '15px'
+                        newContainer.style.display = 'flex'
+                        newCounter.contentEditable = 'false'
+                        newContainer.style.width = `${mainContentWidth}px`
+                        newContainer.style.maxWidth = `${mainContentWidth}px`
+                        newContainer.style.cursor = 'text'
+                        newContainer.style.outline = 'none'
+                        newContainer.style.minHeight = '20px'
+                        newContainer.style.display = 'flex'
+                        newContainer.addEventListener('focusin', () => {
+                            newContainer.style.borderBottom = '1px solid rgb(39, 92, 140)'
+                        })
+                        newContainer.addEventListener('focusout', () => {
+                            newContainer.style.borderBottom = 'none'
+                        })
+                        newStyle.style.minHeight = '20px'
+
+                        if (container.nextSibling !== undefined && container.nextSibling !== null) {
+                            container.parentElement.insertBefore(newContainer, container.nextSibling)
+                        } else {
+                            container.parentElement.appendChild(newContainer)
+                        }
+                        placeCaretAtEnd(newStyle)
+                    }
+                }
+            } else if (newValue.length === 1 && isParentImageContainer) {
+                event.preventDefault()
             }
+        })
+
+        content.addEventListener('contextmenu', (event) => {
+            event.preventDefault()
+            console.log(event)
+            if (layoutOption !== undefined) {
+                document.getElementsByTagName('body')[0].removeChild(layoutOption)
+            }
+            layoutOption = createRightClickMenu(
+                event.clientX,
+                event.clientY,
+                () => {
+                    document.getElementsByTagName('body')[0].removeChild(layoutOption)
+                    content.innerHTML = ''
+                    layoutOption = undefined
+                    if (layoutOptionToggled) {
+                        initializeContentInLayoutMode(content)
+                    } else {
+                        initializeContentInTextMode(content, content)
+                    }
+                    addContentState()
+                },
+                (color, selectedLayout) => {
+                    document.getElementsByTagName('body')[0].removeChild(layoutOption)
+                    layoutOption = undefined
+                    selectedLayout.style.backgroundColor = color
+                    addContentState()
+                }
+            )
+            document.getElementsByTagName('body')[0].appendChild(layoutOption)
         })
 
         content.addEventListener('input', () => {
@@ -1806,6 +2372,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (morePoliceOptionsSelection && window.closeMorePoliceOptionsDropdown && !morePoliceOptionsSelection.contains(event.target) && morePoliceDropdownToggled) {
                 window.closeMorePoliceOptionsDropdown()
             }
+            if (layoutOption !== undefined && !layoutOption.contains(event.target)) {
+                document.getElementsByTagName('body')[0].removeChild(layoutOption)
+                layoutOption = undefined
+            }
             for (let i = 0; i < content.children.length; i++) {
                 if (content.children[i].contains(event.target)) {
                     childSelected = true
@@ -1813,47 +2383,46 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
             if (!childSelected && content.contains(event.target)) {
-                placeCaretAtEnd(content.lastChild.lastChild)
+                if (layoutOptionToggled) {
+                    placeCaretAtEnd(content.lastChild.lastChild.lastChild)
+                } else {
+                    placeCaretAtEnd(content.lastChild.lastChild)
+                }
             }
         }
-
-        let containerWidth = parseInt(content.style.width.replace('px', '')) - 16
-
-        firstContainer.style.display = 'flex'
-        firstContainer.style.minHeight = '18px'
-        firstContainer.style.maxWidth = `${containerWidth}px`
-        firstContainer.style.width = `${containerWidth}px`
-
-        firstParagraph.contentEditable = 'true'
-        firstParagraph.style.width = firstContainer.style.width
-        firstParagraph.style.maxWidth = firstContainer.style.width
-        firstParagraph.style.minHeight = '18px'
-        firstParagraph.style.cursor = 'text'
-        firstParagraph.style.outline = 'none'
-        firstParagraph.addEventListener('focusin', () => {
-            firstParagraph.style.borderBottom = '1px solid rgb(39, 92, 140)'
-        })
-        firstParagraph.addEventListener('focusout', () => {
-            firstParagraph.style.borderBottom = 'none'
-        })
-
-        firstContainer.appendChild(firstParagraph)
-
-        content.appendChild(firstContainer)
 
         root.appendChild(toolbar)
         root.appendChild(content)
 
-        contentState.push(content.cloneNode(true))
+        initializeContentInTextMode(content, content)
+
+        contentState.push({ content: content.cloneNode(true), layoutOptionToggled: layoutOptionToggled })
 
         if (!window.onresize) {
             window.onresize = () => {
-                if (screenWidth !== window.screen.width) {
+                if ((window.screen.width < 680 && latestScreenWidth >= 680) || (window.screen.width >= 680 && latestScreenWidth < 680)) {
                     root.innerHTML = ''
                     initialize()
                 }
             }
         }
+        if (!window.getFinalMarkup) {
+            window.getFinalMarkup = () => {
+                let container = content.cloneNode(true)
+                let pTags = container.querySelectorAll('p')
+                pTags.forEach((p) => {
+                    p.contentEditable = 'false'
+                    p.style.borderBottom = 'none'
+                    p.style.cursor = ''
+                    p.style.width = '100%'
+                    p.style.maxWidth = '100%'
+                    p.parentElement.style.width = '100%'
+                    p.parentElement.style.maxWidth = '100%'
+                })
+                return container.innerHTML
+            }
+        }
+        latestScreenWidth = window.screen.width
     }
 
     initialize()
