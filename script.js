@@ -1311,6 +1311,11 @@ document.addEventListener('DOMContentLoaded', () => {
         while (container.tagName !== 'P') {
             container = container.parentElement
         }
+        let isParentNumberedList = container.parentElement.getAttribute('isnumberedlist') === null ? false : true
+        let isParentOrderedList = container.parentElement.getAttribute('isorderedlist') === null ? false : true
+        if (isParentOrderedList || isParentNumberedList) {
+            container.style.paddingLeft = ''
+        }
         container.style.textAlign = 'left'
         container.style.justifyContent = 'flex-start'
         placeCaretAtEnd(container.lastChild)
@@ -1325,6 +1330,11 @@ document.addEventListener('DOMContentLoaded', () => {
         while (container.tagName !== 'P') {
             container = container.parentElement
         }
+        let isParentNumberedList = container.parentElement.getAttribute('isnumberedlist') === null ? false : true
+        let isParentOrderedList = container.parentElement.getAttribute('isorderedlist') === null ? false : true
+        if (isParentOrderedList || isParentNumberedList) {
+            container.style.paddingLeft = ''
+        }
         container.style.textAlign = 'center'
         container.style.justifyContent = 'center'
         placeCaretAtEnd(container.lastChild)
@@ -1338,6 +1348,11 @@ document.addEventListener('DOMContentLoaded', () => {
         let container = selection.ActiveElements[0]
         while (container.tagName !== 'P') {
             container = container.parentElement
+        }
+        let isParentNumberedList = container.parentElement.getAttribute('isnumberedlist') === null ? false : true
+        let isParentOrderedList = container.parentElement.getAttribute('isorderedlist') === null ? false : true
+        if (isParentOrderedList || isParentNumberedList) {
+            container.style.paddingLeft = ''
         }
         container.style.textAlign = 'right'
         container.style.justifyContent = 'flex-end'
