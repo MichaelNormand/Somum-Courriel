@@ -2417,6 +2417,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         }
+        if (!window.instanciateEditor) {
+            window.instanciateEditor = () => {
+                root.innerHTML = ''
+                initialize()
+            }
+        }
         if (!window.getFinalMarkup) {
             window.getFinalMarkup = () => {
                 let container = content.cloneNode(true)
