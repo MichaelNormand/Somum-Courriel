@@ -16,6 +16,7 @@ let contentIndex = 0
 let screenWidth
 let selection
 let latestScreenWidth
+let selectionAlreadyChanged = false
 
 document.addEventListener('DOMContentLoaded', () => {
     // Content creation functions
@@ -145,7 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         return element
     }
-    let createRightClickMenu = (xPosition, yPosition, layoutOptionToggledCallback, colorChangeOptionToggledCallback) => {
+    let createRightClickMenu = (xPosition, yPosition, layoutOptionToggledCallback, colorChangeOptionToggledCallback, closeOptionCallback) => {
         if (isNaN(xPosition) || isNaN(yPosition)) {
             return undefined
         }
@@ -173,11 +174,147 @@ document.addEventListener('DOMContentLoaded', () => {
         layoutOptionContainer.style.cursor = 'pointer'
         layoutOptionContainer.style.padding = '4px 8px'
         layoutOptionContainer.addEventListener('click', () => {
-            layoutOptionToggled = !layoutOptionToggled
-            if (layoutOptionToggledCallback === undefined) {
-                return
+            if (closeOptionCallback !== undefined) {
+                closeOptionCallback()
             }
-            layoutOptionToggledCallback(layoutOptionToggled)
+            let popupPlaceHolder = document.createElement('div')
+            let popupContainer = document.createElement('div')
+            let popupHeader = document.createElement('div')
+            let popupBody = document.createElement('div')
+            let popupFooter = document.createElement('div')
+            let popupTitle = document.createElement('p')
+            let popupContent = document.createElement('p')
+            let confirmationButton = document.createElement('button')
+            let cancelButton = document.createElement('button')
+            let body = document.querySelector('body')
+            body.style.width = '100%'
+            body.style.height = '100%'
+            body.style.position = 'absolute'
+
+            popupPlaceHolder.style.position = 'absolute'
+            popupPlaceHolder.style.backgroundColor = 'rgba(0, 0, 0, 0.5)'
+            popupPlaceHolder.style.width = '100%'
+            popupPlaceHolder.style.height = '100%'
+            popupPlaceHolder.style.display = 'flex'
+            popupPlaceHolder.style.justifyContent = 'center'
+            popupPlaceHolder.style.alignItems = 'center'
+            popupPlaceHolder.style.transition = 'opacity 0.3s ease'
+            popupPlaceHolder.style.top = '0'
+            popupPlaceHolder.style.left = '0'
+
+            popupContainer.style.display = 'flex'
+            popupContainer.style.flexDirection = 'column'
+            popupContainer.style.justifyContent = 'flex-start'
+            popupContainer.style.alignItems = 'flex-start'
+            popupContainer.style.borderRadius = '0.1em'
+            popupContainer.style.width = '450px'
+            popupContainer.style.backgroundColor = 'white'
+
+            popupHeader.style.display = 'flex'
+            popupHeader.style.backgroundColor = 'rgb(39, 92, 140)'
+            popupHeader.style.width = '100%'
+            popupHeader.style.justifyContent = 'space-between'
+            popupHeader.style.flexWrap = 'wrap'
+            popupHeader.style.borderTopRightRadius = '0.1em'
+            popupHeader.style.borderTopLeftRadius = '0.1em'
+            popupHeader.style.padding = '0.5em 1em'
+
+            popupBody.style.width = '100%'
+            popupBody.style.padding = '0.5em 1em'
+
+            popupFooter.style.display = 'flex'
+            popupFooter.style.flexWrap = 'wrap'
+            popupFooter.style.justifyContent = 'space-between'
+            popupFooter.style.alignItems = 'center'
+            popupFooter.style.padding = '0.5em 1em'
+            popupFooter.style.width = '100%'
+            popupFooter.style.borderBottomLeftRadius = '0.1em'
+            popupFooter.style.borderBottomRightRadius = '0.1em'
+
+            popupTitle.textContent = 'Confirmation'
+            popupTitle.style.color = 'white'
+            popupTitle.style.fontFamily = "'Roboto', sans-serif"
+            popupTitle.style.fontSize = '26px'
+            popupTitle.style.fontWeight = 'bold'
+
+            popupContent.style.fontFamily = "'Roboto', sans-serif"
+            popupContent.style.fontSize = '16px'
+            popupContent.textContent = 'Vous êtes sur le point de changer de méthode de cadrage. Cette opération mènera à la perte des informations déjà dans la fenêtre d\'édition. Voulez-vous tout de même continuer?'
+
+            let destroyPopup = () => {
+                body.removeChild(popupPlaceHolder)
+            }
+            confirmationButton.textContent = 'Continuer'
+            confirmationButton.style.fontFamily = "'Roboto', sans-serif"
+            confirmationButton.style.fontSize = '16px'
+            confirmationButton.style.padding = '0.5em 1em'
+            confirmationButton.style.cursor = 'pointer'
+            confirmationButton.style.backgroundColor = 'transparent'
+            confirmationButton.style.color = 'rgb(39, 92, 140)'
+            confirmationButton.style.fontWeight = 'bold'
+            confirmationButton.style.outline = 'none'
+            confirmationButton.style.border = '1px solid rgb(39, 92, 140)'
+            confirmationButton.style.outlineOffset = '-1px'
+            confirmationButton.style.transition = 'all 0.3s ease'
+            confirmationButton.addEventListener('click', () => {
+                layoutOptionToggled = !layoutOptionToggled
+                if (layoutOptionToggledCallback === undefined) {
+                    return
+                }
+                layoutOptionToggledCallback(layoutOptionToggled)
+                destroyPopup()
+            })
+            confirmationButton.addEventListener('mouseenter', () => {
+                confirmationButton.style.color = 'white'
+                confirmationButton.style.backgroundColor = 'rgb(39, 92, 140)'
+            })
+            confirmationButton.addEventListener('mouseout', () => {
+                confirmationButton.style.color = 'rgb(39, 92, 140)'
+                confirmationButton.style.backgroundColor = 'transparent'
+            })
+
+            cancelButton.textContent = 'Annuler'
+            cancelButton.style.fontFamily = "'Roboto', sans-serif"
+            cancelButton.style.fontSize = '16px'
+            cancelButton.style.padding = '0.5em 1em'
+            cancelButton.style.cursor = 'pointer'
+            cancelButton.style.backgroundColor = 'transparent'
+            cancelButton.style.color = 'rgb(39, 92, 140)'
+            cancelButton.style.fontWeight = 'bold'
+            cancelButton.style.outline = 'none'
+            cancelButton.style.border = '1px solid rgb(39, 92, 140)'
+            cancelButton.style.outlineOffset = '-1px'
+            cancelButton.style.transition = 'all 0.3s ease'
+            cancelButton.addEventListener('click', () => {
+                if (closeOptionCallback === undefined) {
+                    return
+                }
+                closeOptionCallback()
+                destroyPopup()
+            })
+            cancelButton.addEventListener('mouseenter', () => {
+                cancelButton.style.color = 'white'
+                cancelButton.style.backgroundColor = 'rgb(39, 92, 140)'
+            })
+            cancelButton.addEventListener('mouseout', () => {
+                cancelButton.style.color = 'rgb(39, 92, 140)'
+                cancelButton.style.backgroundColor = 'transparent'
+            })
+
+            popupFooter.appendChild(confirmationButton)
+            popupFooter.appendChild(cancelButton)
+
+            popupBody.appendChild(popupContent)
+
+            popupHeader.appendChild(popupTitle)
+            
+            popupContainer.appendChild(popupHeader)
+            popupContainer.appendChild(popupBody)
+            popupContainer.appendChild(popupFooter)
+
+            popupPlaceHolder.appendChild(popupContainer)
+
+            body.appendChild(popupPlaceHolder)
         })
         layoutOptionContainer.addEventListener('mouseenter', () => {
             layoutOptionContainer.style.backgroundColor = 'rgba(0, 0, 0, 0.1)'
@@ -226,6 +363,19 @@ document.addEventListener('DOMContentLoaded', () => {
             colorChangeOptionText.textContent = 'Changer la couleur de la section'
             colorChangeOptionInput.style.display = 'none'
             colorChangeOptionInput.type = 'color'
+            let color = selectedLayout.style.backgroundColor
+            color = color.replace('rgb', '')
+            color = color.replace('(', '')
+            color = color.replace(')', '')
+            color = color.replace(' ', '')
+            color = color.replace(' ', '')
+            let colors = color.split(',')
+            let targetColor = '#'
+            colors.forEach(element => {
+                let hexElement = parseInt(element).toString(16)
+                targetColor += hexElement.length == 1 ? "0" + hexElement : hexElement
+            })
+            colorChangeOptionInput.value = targetColor
             colorChangeOptionInput.addEventListener('change', (event) => {
                 if (colorChangeOptionToggledCallback === undefined) {
                     return
@@ -1102,6 +1252,24 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    let setCaretPosition = (element, caretPos) => {
+        if(element != null && element != undefined) {
+            if(element.createTextRange) {
+                let range = element.createTextRange();
+                range.move('character', caretPos);
+                range.select();
+            }
+            else {
+                if(element.selectionStart) {
+                    element.focus();
+                    element.setSelectionRange(caretPos, caretPos);
+                }
+                else
+                element.focus();
+            }
+        }
+    }
+
     let truncateSelection = () => {
         if (selection === undefined || selection.ActiveElements === undefined || selection.ActiveElements.length <= 0) {
             return
@@ -1527,13 +1695,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         let container = selection.ActiveElements[0]
         let addContainer = false
+        
         while (container.tagName !== 'P') {
             container = container.parentElement
         }
+        let isOnlySpace = container.children[0].textContent.replace(/\s/g, '').length < 1
         if (container.children[0] !== undefined && container.children.length === 1 && container.children[0].tagName === 'BR') {
             container.removeChild(container.children[0])
-        } else if (container.children.length > 1 || (container.children.length === 1 && container.children[0].textContent.length > 0)) {
+        } else if (container.children.length > 1 || (container.children.length === 1 && (container.children[0].textContent.length > 0 && !isOnlySpace))) {
             addContainer = true
+        }
+        if (isOnlySpace) {
+            container.children[0].textContent = ''
         }
         let mainContent = document.querySelector('#html-content-editor')
         let mainContentWidth = parseInt(mainContent.style.width.replace('px', '')) - 14
@@ -1623,9 +1796,9 @@ document.addEventListener('DOMContentLoaded', () => {
         mainContainer.addEventListener('mouseout', () => {
             layoutSelected = undefined
         })
-        header.style.backgroundColor = 'lightgray'
-        body.style.backgroundColor = 'rgba(0, 0, 0, 0.1)'
-        footer.style.backgroundColor = 'lightgray'
+        header.style.backgroundColor = '#d3d3d3'
+        body.style.backgroundColor = '#e8e8e8'
+        footer.style.backgroundColor = '#d3d3d3'
     }
 
     // Initialization function
@@ -1761,7 +1934,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.addEventListener('selectionchange', () => {
             let activeSelection = document.getSelection()
-            if (toolbar.contains(activeSelection.anchorNode) || activeSelection.anchorNode === undefined || activeSelection.anchorNode === null) {
+            if (toolbar.contains(activeSelection.anchorNode) || activeSelection.anchorNode === undefined || activeSelection.anchorNode === null || selectionAlreadyChanged) {
+                selectionAlreadyChanged = false
                 return
             }
             if (activeSelection.type === 'Caret') {
@@ -2073,6 +2247,24 @@ document.addEventListener('DOMContentLoaded', () => {
                     let newContainer = document.createElement('p')
                     let newElement = document.createElement('somum-custom-style')
                     let containerWidth = parseInt(content.style.width.replace('px', '')) - 14
+                    let elementsToAdd = []
+                    let setCaretAtBegining = false
+                    if (selection.HasSelection === false && (selection.StartOffset !== selection.ActiveElements[0].textContent.length || selection.ActiveElements[0].parentElement.lastChild !== selection.ActiveElements[0])) {
+                        setCaretAtBegining = true
+                        let textToAdd = selection.ActiveElements[0].textContent
+                        let container = selection.ActiveElements[0].parentElement
+                        let actualElement = selection.ActiveElements[0]
+                        textToAdd = textToAdd.substring(selection.StartOffset, selection.ActiveElements[0].textContent.length)
+                        newElement = selection.ActiveElements[0].cloneNode(true)
+                        newElement.textContent = textToAdd
+                        newElement.innerHTML = textToAdd.split(' ').join('&nbps;')
+                        selection.ActiveElements[0].textContent = selection.ActiveElements[0].textContent.substring(0, selection.StartOffset)
+                        selection.ActiveElements[0].innerHTML = selection.ActiveElements[0].textContent.substring(0, selection.StartOffset).split(' ').join('&nbsp;')
+                        while(actualElement !== container.lastChild) {
+                            actualElement = actualElement.nextElementSibling
+                            elementsToAdd.push(actualElement)
+                        }
+                    }
                     newMainContainer.style.display = 'flex'
                     newMainContainer.style.flexDirection = 'column'
                     newMainContainer.style.minHeight = '20px'
@@ -2094,13 +2286,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     newElement.style.minHeight = '20px'
                     newContainer.appendChild(newElement)
+                    if (elementsToAdd.length > 0) {
+                        elementsToAdd.forEach(element => {
+                            newContainer.appendChild(element)
+                        })
+                    }
                     newMainContainer.appendChild(newContainer)
                     if (mainContainerSibling !== undefined && mainContainerSibling !== null) {
                         mainStructure.insertBefore(newMainContainer, mainContainerSibling)
                     } else {
                         mainStructure.appendChild(newMainContainer)
                     }
-                    placeCaretAtEnd(newElement)
+                    placeCaretAtEnd(newContainer.lastChild)
                 } else if (isParentNumberedList || isParentOrderedList) {
                     if (container.lastChild.tagName === 'SOMUM-CUSTOM-STYLE' && container.lastChild.textContent.length <= 0 && container.children.length === 2) {
                         if (isParentNumberedList) {
@@ -2238,9 +2435,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 event.clientX,
                 event.clientY,
                 () => {
-                    document.getElementsByTagName('body')[0].removeChild(layoutOption)
-                    content.innerHTML = ''
+                    if (layoutOption !== undefined) {
+                        document.getElementsByTagName('body')[0].removeChild(layoutOption)
+                    }
                     layoutOption = undefined
+                    content.innerHTML = ''
                     if (layoutOptionToggled) {
                         initializeContentInLayoutMode(content)
                     } else {
@@ -2249,10 +2448,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     addContentState()
                 },
                 (color, selectedLayout) => {
-                    document.getElementsByTagName('body')[0].removeChild(layoutOption)
+                    if (layoutOption !== undefined) {
+                        document.getElementsByTagName('body')[0].removeChild(layoutOption)
+                    }
                     layoutOption = undefined
                     selectedLayout.style.backgroundColor = color
                     addContentState()
+                },
+                () => { 
+                    if (layoutOption !== undefined) {
+                        document.getElementsByTagName('body')[0].removeChild(layoutOption)
+                    }
+                    layoutOption = undefined
                 }
             )
             document.getElementsByTagName('body')[0].appendChild(layoutOption)
@@ -2394,10 +2601,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
             if (!childSelected && content.contains(event.target)) {
+                selectionAlreadyChanged = true
                 if (layoutOptionToggled) {
                     placeCaretAtEnd(content.lastChild.lastChild.lastChild.lastChild)
+                    selection = {
+                        ActiveElements: [content.lastChild.lastChild.lastChild.lastChild],
+                        HasSelection: false,
+                        StartOffset: content.lastChild.lastChild.lastChild.lastChild.textContent.length,
+                        EndOffset: content.lastChild.lastChild.lastChild.lastChild.textContent.length
+                    }
                 } else {
-                    placeCaretAtEnd(content.lastChild.lastChild)
+                    placeCaretAtEnd(content.lastChild.lastChild.lastChild)
+                    selection = {
+                        ActiveElements: [content.lastChild.lastChild.lastChild],
+                        HasSelection: false,
+                        StartOffset: content.lastChild.lastChild.lastChild.textContent.length,
+                        EndOffset: content.lastChild.lastChild.lastChild.textContent.length
+                    }
                 }
             }
         }
