@@ -1306,6 +1306,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 loneElement.appendChild(newElement)
                 return [newElement]
             } else if (loneElement.tagName === 'SOMUM-CUSTOM-STYLE') {
+                let container = loneElement
+                while (container.tagName !== 'P') {
+                    container = container.parentElement
+                }
+                if (container.lastChild === loneElement && selection.StartOffset === loneElement.textContent.length) {
+                    let newElement = loneElement.cloneNode(true)
+                    newElement.textContent = ''
+                    newElement.innerHTML = ''
+                    container.appendChild(newElement)
+                    return [newElement]
+                }
                 return [loneElement]
             }
         }
@@ -1611,7 +1622,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let firstElement = addContainer ? document.createElement('somum-custom-style') : container.firstChild
         let mainContent = document.querySelector('#html-content-editor')
         let itterator = document.createElement('somum-counter')
-        let mainContentWidth = parseInt(mainContent.style.width.replace('px', '')) - 14
+        let mainContentWidth = parseInt(mainContent.style.width.replace('px', '')) - 21
         numberedList.contentEditable = 'true'
         mainContainer.setAttribute('isnumberedlist', 'true')
         if (!addContainer) {
@@ -1670,7 +1681,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let firstElement = addContainer ? document.createElement('somum-custom-style') : container.firstChild
         let mainContent = document.querySelector('#html-content-editor')
         let itterator = document.createElement('somum-counter')
-        let mainContentWidth = parseInt(mainContent.style.width.replace('px', '')) - 14
+        let mainContentWidth = parseInt(mainContent.style.width.replace('px', '')) - 21
         orderedList.contentEditable = 'true'
         mainContainer.setAttribute('isorderedlist', 'true')
         if (!addContainer) {
@@ -1729,7 +1740,7 @@ document.addEventListener('DOMContentLoaded', () => {
             container.children[0].textContent = ''
         }
         let mainContent = document.querySelector('#html-content-editor')
-        let mainContentWidth = parseInt(mainContent.style.width.replace('px', '')) - 14
+        let mainContentWidth = parseInt(mainContent.style.width.replace('px', '')) - 21
         let imageContainer = addContainer ? document.createElement('div') : container.parentElement
         let mainContainer = addContainer ? document.createElement('p') : container
         let firstContent = document.createElement('somum-custom-style')
@@ -1765,7 +1776,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let firstContainer = document.createElement('div')
         let firstParagraph = document.createElement('p')
         let firstStyle = document.createElement('somum-custom-style')
-        let containerWidth = parseInt(mainContainer.style.width.replace('px', '')) - 14
+        let containerWidth = parseInt(mainContainer.style.width.replace('px', '')) - 21
         firstContainer.style.display = 'flex'
         firstContainer.style.flexDirection = 'column'
         firstContainer.style.minHeight = '20px'
@@ -1950,7 +1961,7 @@ document.addEventListener('DOMContentLoaded', () => {
         content.style.flexWrap = 'nowrap'
         content.style.flexDirection = 'column'
         content.style.justifyContent = 'flex-start'
-        content.style.alignItems = 'flex-start'
+        content.style.alignItems = 'center'
 
         document.addEventListener('selectionchange', () => {
             let activeSelection = document.getSelection()
@@ -2165,7 +2176,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                         let newMainContainer = document.createElement('div')
                                         let newContainer = document.createElement('p')
                                         let newElement = document.createElement('somum-custom-style')
-                                        let containerWidth = parseInt(content.style.width.replace('px', '')) - 14
+                                        let containerWidth = parseInt(content.style.width.replace('px', '')) - 21
                                         newMainContainer.style.display = 'flex'
                                         newMainContainer.style.flexDirection = 'column'
                                         newMainContainer.style.minHeight = '20px'
@@ -2286,7 +2297,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     let newMainContainer = document.createElement('div')
                     let newContainer = document.createElement('p')
                     let newElement = document.createElement('somum-custom-style')
-                    let containerWidth = parseInt(content.style.width.replace('px', '')) - 14
+                    let containerWidth = parseInt(content.style.width.replace('px', '')) - 21
                     let elementsToAdd = []
                     let activeSelection = window.getSelection()
                     let setCaretAtBegining = false
@@ -2373,7 +2384,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 let newMainContainer = document.createElement('div')
                                 let newContainer = document.createElement('p')
                                 let newElement = document.createElement('somum-custom-style')
-                                let containerWidth = parseInt(content.style.width.replace('px', '')) - 14
+                                let containerWidth = parseInt(content.style.width.replace('px', '')) - 21
                                 newMainContainer.style.display = 'flex'
                                 newMainContainer.style.flexDirection = 'column'
                                 newMainContainer.style.minHeight = '20px'
@@ -2422,7 +2433,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         let newCounter = document.createElement('somum-counter')
                         let newStyle = document.createElement('somum-custom-style')
 
-                        let mainContentWidth = parseInt(content.style.width.replace('px', '')) - 14
+                        let mainContentWidth = parseInt(content.style.width.replace('px', '')) - 21
                         if (isParentNumberedList) {
                             let actualCount = parseInt(container.getAttribute('counter'))
                             newContainer.setAttribute('counter', actualCount + 1)
@@ -2699,6 +2710,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         latestScreenWidth = window.screen.width
+        placeCaretAtEnd(content.lastChild.lastChild.lastChild)
     }
 
     initialize()
