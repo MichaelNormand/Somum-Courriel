@@ -239,7 +239,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             popupContent.style.fontFamily = "'Roboto', sans-serif"
             popupContent.style.fontSize = '16px'
-            popupContent.textContent = 'Vous êtes sur le point de changer de méthode de cadrage. Cette opération mènera à la perte des informations déjà dans la fenêtre d\'édition. Voulez-vous tout de même continuer?'
+            popupContent.textContent =
+                "Vous êtes sur le point de changer de méthode de cadrage. Cette opération mènera à la perte des informations déjà dans la fenêtre d'édition. Voulez-vous tout de même continuer?"
 
             let destroyPopup = () => {
                 body.removeChild(popupPlaceHolder)
@@ -307,7 +308,7 @@ document.addEventListener('DOMContentLoaded', () => {
             popupBody.appendChild(popupContent)
 
             popupHeader.appendChild(popupTitle)
-            
+
             popupContainer.appendChild(popupHeader)
             popupContainer.appendChild(popupBody)
             popupContainer.appendChild(popupFooter)
@@ -371,9 +372,9 @@ document.addEventListener('DOMContentLoaded', () => {
             color = color.replace(' ', '')
             let colors = color.split(',')
             let targetColor = '#'
-            colors.forEach(element => {
+            colors.forEach((element) => {
                 let hexElement = parseInt(element).toString(16)
-                targetColor += hexElement.length == 1 ? "0" + hexElement : hexElement
+                targetColor += hexElement.length == 1 ? '0' + hexElement : hexElement
             })
             colorChangeOptionInput.value = targetColor
             colorChangeOptionInput.addEventListener('change', (event) => {
@@ -1239,7 +1240,23 @@ document.addEventListener('DOMContentLoaded', () => {
         content.focus()
         if (typeof window.getSelection != 'undefined' && typeof document.createRange != 'undefined') {
             let range = document.createRange()
-            range.selectNodeContents(content)
+            if (content.lastChild !== undefined && content.lastChild !== null) {
+                let text = content.lastChild
+                while (text.tagName !== undefined) {
+                    if (text.lastChild !== null) {
+                        text = text.lastChild
+                    } else {
+                        break
+                    }
+                }
+                if (text.tagName === undefined) {
+                    range.setStart(text, text.textContent.length)
+                } else {
+                    range.selectNode(text)
+                }
+            } else {
+                range.selectNode(content)
+            }
             range.collapse(false)
             let sel = window.getSelection()
             sel.removeAllRanges()
@@ -1250,22 +1267,25 @@ document.addEventListener('DOMContentLoaded', () => {
             textRange.collapse(false)
             textRange.select()
         }
+        selection = {
+            ActiveElements: [content],
+            HasSelection: false,
+            StartOffset: content.textContent.length,
+            EndOffset: content.textContent.length,
+        }
     }
 
     let setCaretPosition = (element, caretPos) => {
-        if(element != null && element != undefined) {
-            if(element.createTextRange) {
-                let range = element.createTextRange();
-                range.move('character', caretPos);
-                range.select();
-            }
-            else {
-                if(element.selectionStart) {
-                    element.focus();
-                    element.setSelectionRange(caretPos, caretPos);
-                }
-                else
-                element.focus();
+        if (element != null && element != undefined) {
+            if (element.createTextRange) {
+                let range = element.createTextRange()
+                range.move('character', caretPos)
+                range.select()
+            } else {
+                if (element.selectionStart) {
+                    element.focus()
+                    element.setSelectionRange(caretPos, caretPos)
+                } else element.focus()
             }
         }
     }
@@ -1695,14 +1715,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         let container = selection.ActiveElements[0]
         let addContainer = false
-        
+
         while (container.tagName !== 'P') {
             container = container.parentElement
         }
         let isOnlySpace = container.children[0].textContent.replace(/\s/g, '').length < 1
         if (container.children[0] !== undefined && container.children.length === 1 && container.children[0].tagName === 'BR') {
             container.removeChild(container.children[0])
-        } else if (container.children.length > 1 || (container.children.length === 1 && (container.children[0].textContent.length > 0 && !isOnlySpace))) {
+        } else if (container.children.length > 1 || (container.children.length === 1 && container.children[0].textContent.length > 0 && !isOnlySpace)) {
             addContainer = true
         }
         if (isOnlySpace) {
@@ -2026,6 +2046,9 @@ document.addEventListener('DOMContentLoaded', () => {
             let activeSelection = window.getSelection()
             let activeElement = activeSelection.anchorNode
             let newValue = event.key
+            if (activeElement === undefined || activeElement === null) {
+                return
+            }
             if (activeElement.tagName === undefined) {
                 activeElement = activeElement.parentElement
             }
@@ -2063,6 +2086,23 @@ document.addEventListener('DOMContentLoaded', () => {
                     activeElement.textContent = newValue.split(' ').join(' ')
                     activeElement.innerHTML = newValue.split(' ').join('&nbsp;')
                     placeCaretAtEnd(activeElement)
+                }
+            } else if (newValue == 'Delete') {
+                if (isParentImageContainer) {
+                    let image = container.getElementsByTagName('img')[0]
+                    if (image === undefined || image === null) {
+                        event.preventDefault()
+                        return
+                    }
+                    let imageContainer = image.parentElement
+                    if (imageContainer.textContent.length > 0) {
+                        return
+                    }
+                    event.preventDefault()
+                    imageContainer.removeChild(image)
+                    container.parentElement.removeAttribute('isimagecontainer')
+                    container.parentElement.style.minHeight = '20px'
+                    placeCaretAtEnd(imageContainer)
                 }
             } else if (newValue === 'Backspace') {
                 if (activeElement.tagName === 'SOMUM-CUSTOM-STYLE') {
@@ -2248,8 +2288,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     let newElement = document.createElement('somum-custom-style')
                     let containerWidth = parseInt(content.style.width.replace('px', '')) - 14
                     let elementsToAdd = []
+                    let activeSelection = window.getSelection()
                     let setCaretAtBegining = false
-                    if (selection.HasSelection === false && (selection.StartOffset !== selection.ActiveElements[0].textContent.length || selection.ActiveElements[0].parentElement.lastChild !== selection.ActiveElements[0])) {
+                    if (
+                        selection.HasSelection === false &&
+                        (selection.StartOffset !== selection.ActiveElements[0].textContent.length || selection.ActiveElements[0].parentElement.lastChild !== selection.ActiveElements[0]) &&
+                        !isParentImageContainer
+                    ) {
                         setCaretAtBegining = true
                         let textToAdd = selection.ActiveElements[0].textContent
                         let container = selection.ActiveElements[0].parentElement
@@ -2260,7 +2305,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         newElement.innerHTML = textToAdd.split(' ').join('&nbps;')
                         selection.ActiveElements[0].textContent = selection.ActiveElements[0].textContent.substring(0, selection.StartOffset)
                         selection.ActiveElements[0].innerHTML = selection.ActiveElements[0].textContent.substring(0, selection.StartOffset).split(' ').join('&nbsp;')
-                        while(actualElement !== container.lastChild) {
+                        while (actualElement !== container.lastChild) {
                             actualElement = actualElement.nextElementSibling
                             elementsToAdd.push(actualElement)
                         }
@@ -2287,7 +2332,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     newElement.style.minHeight = '20px'
                     newContainer.appendChild(newElement)
                     if (elementsToAdd.length > 0) {
-                        elementsToAdd.forEach(element => {
+                        elementsToAdd.forEach((element) => {
                             newContainer.appendChild(element)
                         })
                     }
@@ -2455,7 +2500,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     selectedLayout.style.backgroundColor = color
                     addContentState()
                 },
-                () => { 
+                () => {
                     if (layoutOption !== undefined) {
                         document.getElementsByTagName('body')[0].removeChild(layoutOption)
                     }
@@ -2608,7 +2653,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         ActiveElements: [content.lastChild.lastChild.lastChild.lastChild],
                         HasSelection: false,
                         StartOffset: content.lastChild.lastChild.lastChild.lastChild.textContent.length,
-                        EndOffset: content.lastChild.lastChild.lastChild.lastChild.textContent.length
+                        EndOffset: content.lastChild.lastChild.lastChild.lastChild.textContent.length,
                     }
                 } else {
                     placeCaretAtEnd(content.lastChild.lastChild.lastChild)
@@ -2616,7 +2661,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         ActiveElements: [content.lastChild.lastChild.lastChild],
                         HasSelection: false,
                         StartOffset: content.lastChild.lastChild.lastChild.textContent.length,
-                        EndOffset: content.lastChild.lastChild.lastChild.textContent.length
+                        EndOffset: content.lastChild.lastChild.lastChild.textContent.length,
                     }
                 }
             }
@@ -2635,12 +2680,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     root.innerHTML = ''
                     initialize()
                 }
-            }
-        }
-        if (!window.instanciateEditor) {
-            window.instanciateEditor = () => {
-                root.innerHTML = ''
-                initialize()
             }
         }
         if (!window.getFinalMarkup) {
