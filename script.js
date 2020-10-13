@@ -2711,6 +2711,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 return container.innerHTML
             }
         }
+        if (!window.instanciateEditor) {
+            window.instanciateEditor = () => {
+                root.innerHTML = ''
+                initialize()
+                return 'Editor Initialized'
+            }
+        }
         latestScreenWidth = window.screen.width
         placeCaretAtEnd(content.lastChild.lastChild.lastChild)
     }
