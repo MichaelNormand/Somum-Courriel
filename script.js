@@ -2290,9 +2290,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } else if (newValue === 'Enter') {
                 event.preventDefault()
+                let mainContainer = container.parentElement
+                let mainStructure = mainContainer.parentElement
                 if (!isParentNumberedList && !isParentOrderedList) {
-                    let mainContainer = container.parentElement
-                    let mainStructure = mainContainer.parentElement
                     let mainContainerSibling = mainContainer.nextSibling
                     let newMainContainer = document.createElement('div')
                     let newContainer = document.createElement('p')
@@ -2359,12 +2359,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (isParentNumberedList) {
                             let actualCount = parseInt(container.getAttribute('counter'))
                             let elementCountBuffer
-                            for (let i = actualCount - 1; i < container.parentElement.children.length; i++) {
-                                elementCountBuffer = parseInt(container.parentElement.children[i].getAttribute('counter'))
-                                --elementCountBuffer
-                                container.parentElement.children[i].firstChild.textContent = `${elementCountBuffer}. `
-                                container.parentElement.children[i].firstChild.innerHTML = `${elementCountBuffer}.&nbsp;`
-                                container.parentElement.children[i].setAttribute('counter', elementCountBuffer)
+                            if (actualCount > 1) {
+                                for (let i = actualCount - 1; i < container.parentElement.children.length; i++) {
+                                    elementCountBuffer = parseInt(container.parentElement.children[i].getAttribute('counter'))
+                                    --elementCountBuffer
+                                    container.parentElement.children[i].firstChild.textContent = `${elementCountBuffer}. `
+                                    container.parentElement.children[i].firstChild.innerHTML = `${elementCountBuffer}.&nbsp;`
+                                    container.parentElement.children[i].setAttribute('counter', elementCountBuffer)
+                                }
                             }
                         }
                         if (container.previousSibling !== undefined && container.previousSibling !== null) {
