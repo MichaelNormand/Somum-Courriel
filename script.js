@@ -3564,7 +3564,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		}
 		if (!window.getFinalMarkup) {
 			window.getFinalMarkup = () => {
-				let container = content.cloneNode(true)
+				let container = document.getElementById('html-content-editor').cloneNode(true)
 				let pTags = container.querySelectorAll("p")
 				let wrapper = document.createElement("div")
 				wrapper.setAttribute("layoutMode", layoutOptionToggled)
@@ -3578,7 +3578,7 @@ document.addEventListener("DOMContentLoaded", () => {
 					p.parentElement.style.maxWidth = "100%"
 				})
 				wrapper.innerHTML = container.innerHTML
-				return wrapper.outerHTML
+				return wrapper.outerHTML.replaceAll('"', '\\"')
 			}
 		}
 		if (!window.instanciateEditor) {
