@@ -1884,7 +1884,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         #{mainRoot} * {
             box-sizing: border-box;
-        }`
+		}`
+		layoutOptionToggled = false
+
 		googleMaterial.rel = 'stylesheet'
 		googleMaterial.type = 'text/css'
 		googleMaterial.href = 'https://fonts.googleapis.com/icon?family=Material+Icons'
