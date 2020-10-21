@@ -2452,7 +2452,6 @@ let initialize = (initializationContent = undefined) => {
 
 	content.addEventListener('contextmenu', (event) => {
 		event.preventDefault()
-		console.log(event)
 		if (layoutOption !== undefined) {
 			document.getElementsByTagName('body')[0].removeChild(layoutOption)
 		}
