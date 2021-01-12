@@ -2691,7 +2691,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				// border="0" cellpadding="0" cellspacing="0" height="100%" width="100%"
 				wrapper.style.border = '0'
 				wrapper.style.width = '100%'
-				wrapper.cellPadding = '0'
+				wrapper.cellPadding = '5px'
 				wrapper.cellSpacing = '0'
 				//wrapper.setAttribute('layoutMode', layoutOptionToggled)
 				if (!layoutOptionToggled) {
@@ -2733,6 +2733,7 @@ document.addEventListener('DOMContentLoaded', () => {
 							newCell.style.justifyContent = ''
 							newCell.style.flexDirection = ''
 							newCell.style.textAlign = container.children[k].children[i].style.justifyContent === 'flex-start' ? 'left' : container.children[k].children[i].style.justifyContent === 'flex-end' ? 'right' : container.children[k].children[i].style.justifyContent === 'center' ? 'center' : ''
+							newCell.style.padding = '0'
 							for (let j = 0; j < container.children[k].children[i].children.length; j++) {
 								let newStyle = document.createElement('span')
 								newStyle.style.cssText = container.children[k].children[i].children[j].style.cssText
@@ -2778,6 +2779,7 @@ document.addEventListener('DOMContentLoaded', () => {
 								newContainer.setAttribute('layoutid', l + 1)
 								newContainer.style.width = '100%'
 								newContainer.style.minHeight = '20px'
+								newContainer.style.padding = '5px'
 								newContainer.style.backgroundColor = backgroundColor
 								newCell.style.cssText = container.firstChild.children[l].children[k].children[i].style.cssText
 								newCell.style.display = ''
