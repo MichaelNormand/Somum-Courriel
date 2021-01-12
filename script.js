@@ -1510,7 +1510,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		let isParentNumberedList = container.parentElement.getAttribute('isnumberedlist') === null ? false : true
 		let isParentOrderedList = container.parentElement.getAttribute('isorderedlist') === null ? false : true
 		if (isParentOrderedList || isParentNumberedList) {
-			container.style.paddingLeft = ''
+			container.style.paddingLeft = '15px'
 		}
 		container.style.textAlign = 'left'
 		container.style.justifyContent = 'flex-start'
@@ -1560,6 +1560,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		if (selection === undefined || selection.ActiveElements === undefined || selection.ActiveElements.length <= 0) {
 			return
 		}
+		let mainContainer
 		let container = selection.ActiveElements[0]
 		let sizeIndent = parseInt(indentSize.replace('px', ''))
 		while (container.tagName !== 'P') {
@@ -1727,13 +1728,18 @@ document.addEventListener('DOMContentLoaded', () => {
 		while (container.tagName !== 'P') {
 			container = container.parentElement
 		}
+		let isParentNumberedList = container.parentElement.getAttribute('isnumberedlist') === null ? false : true
+		let isParentOrderedList = container.parentElement.getAttribute('isorderedlist') === null ? false : true
+		let isParentImageContainer = container.parentElement.getAttribute('isimagecontainer') === null ? false : true
 		let isOnlySpace = container.children[0].textContent.replace(/\s/g, '').length < 1
 		if (container.children[0] !== undefined && container.children.length === 1 && container.children[0].tagName === 'BR') {
 			container.removeChild(container.children[0])
 		} else if (container.children.length > 1 || (container.children.length === 1 && container.children[0].textContent.length > 0 && !isOnlySpace)) {
 			addContainer = true
+		} else if (isParentImageContainer || isParentNumberedList || isParentOrderedList) {
+			addContainer = true
 		}
-		if (isOnlySpace) {
+		if (isOnlySpace && !isParentImageContainer && !isParentNumberedList && !isParentOrderedList) {
 			container.children[0].textContent = ''
 		}
 		let mainContent = document.querySelector('#html-content-editor')
@@ -1749,12 +1755,25 @@ document.addEventListener('DOMContentLoaded', () => {
 				mainContent.appendChild(imageContainer)
 			}
 			imageContainer.appendChild(mainContainer)
+			mainContainer.style.width = `${mainContentWidth}px`
+			mainContainer.style.maxWidth = `${mainContentWidth}px`
+			mainContainer.style.minHeight = '20px'
+			mainContainer.style.cursor = 'text'
+			mainContainer.style.outline = 'none'
+			mainContainer.style.borderBottom = 'none'
+			mainContainer.addEventListener('focusin', () => {
+				mainContainer.style.borderBottom = '1px solid rgb(39, 92, 140)'
+			})
+			mainContainer.addEventListener('focusout', () => {
+				mainContainer.style.borderBottom = 'none'
+			})
 		} else {
 			mainContainer.removeChild(mainContainer.firstChild)
 		}
 		mainContainer.appendChild(firstContent)
 		imageContainer.style.display = 'flex'
 		imageContainer.style.flexWrap = 'wrap'
+		imageContainer.style.flexDirection = 'column'
 		mainContainer.contentEditable = 'true'
 		mainContainer.style.display = ''
 		imageContainer.style.width = `${mainContentWidth}px`
@@ -2691,7 +2710,6 @@ document.addEventListener('DOMContentLoaded', () => {
 				// border="0" cellpadding="0" cellspacing="0" height="100%" width="100%"
 				wrapper.style.border = '0'
 				wrapper.style.width = '100%'
-				wrapper.cellPadding = '5px'
 				wrapper.cellSpacing = '0'
 				//wrapper.setAttribute('layoutMode', layoutOptionToggled)
 				if (!layoutOptionToggled) {
@@ -2738,6 +2756,9 @@ document.addEventListener('DOMContentLoaded', () => {
 								let newStyle = document.createElement('span')
 								newStyle.style.cssText = container.children[k].children[i].children[j].style.cssText
 								newStyle.innerHTML = container.children[k].children[i].children[j].innerHTML
+								if (j === 0 && (isContainerNumberedList || isContainerOrderedList)) {
+									newStyle.style.marginLeft = '15px'
+								}
 								newCell.appendChild(newStyle)
 							}
 						}
@@ -2779,13 +2800,24 @@ document.addEventListener('DOMContentLoaded', () => {
 								newContainer.setAttribute('layoutid', l + 1)
 								newContainer.style.width = '100%'
 								newContainer.style.minHeight = '20px'
-								newContainer.style.padding = '5px'
 								newContainer.style.backgroundColor = backgroundColor
 								newCell.style.cssText = container.firstChild.children[l].children[k].children[i].style.cssText
 								newCell.style.display = ''
 								newCell.style.justifyContent = ''
 								newCell.style.flexDirection = ''
 								newCell.style.textAlign = container.firstChild.children[l].children[k].children[i].style.justifyContent === 'flex-start' ? 'left' : container.firstChild.children[l].children[k].children[i].style.justifyContent === 'flex-end' ? 'right' : container.firstChild.children[l].children[k].children[i].style.justifyContent === 'center' ? 'center' : ''
+								if (i === 0) {
+									newCell.style.paddingTop = '5px'
+								}
+								if (i === container.firstChild.children[l].children[k].children.length - 1) {
+									newCell.style.paddingBottom = '5px'
+								}
+								if (isContainerNumberedList || isContainerOrderedList) {
+									newCell.style.paddingLeft = '10px'
+								} else {
+									newCell.style.paddingLeft = '5px'
+								}
+								newCell.style.paddingRight = '5px'
 								for (let j = 0; j < container.firstChild.children[l].children[k].children[i].children.length; j++) {
 									let newStyle = document.createElement('span')
 									newStyle.style.cssText = container.firstChild.children[l].children[k].children[i].children[j].style.cssText
