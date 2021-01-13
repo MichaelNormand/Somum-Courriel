@@ -1849,7 +1849,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	}
 
 	// Initialization function
-	let initialize = () => {
+	let initialize = (initValue) => {
 		let head = document.getElementsByTagName('HEAD')[0]
 		let style = document.createElement('style')
 		let googleMaterial = document.createElement('link')
@@ -2671,7 +2671,156 @@ document.addEventListener('DOMContentLoaded', () => {
 		root.appendChild(toolbar)
 		root.appendChild(content)
 
-		initializeContentInTextMode(content, content)
+		if (initValue !== undefined) {
+			let parser = document.createElement('div')
+			let contentWidth = parseInt(content.style.width.replace('px', '')) - 21
+			parser.innerHTML = initValue
+			let table = parser.firstChild
+			if (table.nodeName === 'TABLE') {
+				let tableRows = table.rows
+				let containers = []
+				for (let i = 0; i < tableRows.length; i++) {
+					let isContainerNumberedList = tableRows[i].getAttribute('isnumberedlist') !== null ? (tableRows[i].getAttribute('isnumberedlist') === 'true' ? true : false) : false
+					let isContainerOrderedList = tableRows[i].getAttribute('isorderedlist') !== null ? (tableRows[i].getAttribute('isorderedlist') === 'true' ? true : false) : false
+					let isContainerImageContainer = tableRows[i].getAttribute('isimagecontainer') !== null ? (tableRows[i].getAttribute('isimagecontainer') === 'true' ? true : false) : false
+					let layoutid = tableRows[i].getAttribute('layoutid') !== null ? (isNaN(parseInt(tableRows[i].getAttribute('layoutid'))) ? undefined : parseInt(tableRows[i].getAttribute('layoutid'))) : undefined
+					let cells = tableRows[i].cells[0].children
+					let paragraph = document.createElement('p')
+					let container
+
+					paragraph.style.width = `${contentWidth}px`
+					paragraph.style.maxWidth = `${contentWidth}px`
+					paragraph.style.minHeight = '20px'
+					paragraph.style.cursor = 'text'
+					paragraph.style.outline = 'none'
+					paragraph.style.borderBottom = 'none'
+					paragraph.style.padding = 'none'
+					paragraph.contentEditable = 'true'
+
+					if (layoutid !== undefined) {
+						layoutOptionToggled = true
+					}
+
+					if (!isContainerNumberedList && !isContainerOrderedList) {
+						container = document.createElement('div')
+					} else {
+						if (containers.length > 0) {
+							container = containers.pop()
+							let isNewContainerNumberedList = container.getAttribute('isnumberedlist') !== null ? (container.getAttribute('isnumberedlist') === 'true' ? true : false) : false
+							let isNewContainerOrderedList = container.getAttribute('isorderedlist') !== null ? (container.getAttribute('isorderedlist') === 'true' ? true : false) : false
+							if (!isNewContainerNumberedList && !isNewContainerOrderedList) {
+								containers.push(container)
+								container = document.createElement('div')
+							}
+						} else {
+							container = document.createElement('div')
+						}
+						paragraph.style.paddingLeft = '15px'
+					}
+
+					if (isContainerImageContainer) {
+						container.setAttribute('isimagecontainer', 'true')
+					}
+
+					if (isContainerNumberedList) {
+						container.setAttribute('isnumberedlist', 'true')
+					}
+
+					if (isContainerOrderedList) {
+						container.setAttribute('isorderedlist', 'true')
+					}
+
+					if (tableRows[i].cells[0].style.textAlign === 'right') {
+						paragraph.style.justifyContent = 'flex-end'
+						paragraph.style.textAlign = 'right'
+					}
+
+					if (tableRows[i].cells[0].style.textAlign === 'center') {
+						paragraph.style.justifyContent = 'center'
+						paragraph.style.textAlign = 'center'
+					}
+
+					if (tableRows[i].cells[0].style.textAlign === 'left') {
+						paragraph.style.justifyContent = 'flex-start'
+						paragraph.style.textAlign = 'left'
+					}
+
+					paragraph.addEventListener('focusin', () => {
+						paragraph.style.borderBottom = '1px solid rgb(39, 92, 140)'
+					})
+					paragraph.addEventListener('focusout', () => {
+						paragraph.style.borderBottom = 'none'
+					})
+
+					container.style.display = 'flex'
+					container.style.width = `${contentWidth}px`
+					container.style.maxWidth = `${contentWidth}px`
+					container.style.minHeight = '20px'
+					container.style.flexDirection = 'column'
+
+					container.appendChild(paragraph)
+					for (let j = 0; j < cells.length; j++) {
+						let customStyle
+						if ((!isContainerNumberedList && !isContainerOrderedList) || ((isContainerNumberedList || isContainerOrderedList) && j !== 0)) {
+							customStyle = document.createElement('somum-custom-style')
+							customStyle.style.cssText = cells[j].style.cssText
+						} else {
+							customStyle = document.createElement('somum-counter')
+							customStyle.contentEditable = 'false'
+						}
+						customStyle.innerHTML = cells[j].innerHTML
+						paragraph.appendChild(customStyle)
+					}
+					if (layoutOptionToggled) {
+						let layout
+						if (containers.length > 0) {
+							layout = containers.pop()
+							let layoutId = layout.getAttribute('layoutid') !== null ? (isNaN(parseInt(layout.getAttribute('layoutid'))) ? undefined : parseInt(layout.getAttribute('layoutid'))) : undefined
+							if (layoutId === layoutid) {
+								layout.appendChild(container)
+							} else {
+								containers.push(layout)
+								layout = document.createElement('div')
+								layout.style.backgroundColor = tableRows[i].style.backgroundColor
+								layout.setAttribute('layoutid', `${layoutid}`)
+								layout.appendChild(container)
+							}
+						} else {
+							layout = document.createElement('div')
+							layout.style.backgroundColor = tableRows[i].style.backgroundColor
+							layout.setAttribute('layoutid', `${layoutid}`)
+							layout.appendChild(container)
+						}
+						container.backgroundColor = 'transparent'
+						containers.push(layout)
+					} else {
+						containers.push(container)
+					}
+				}
+				if (!layoutOptionToggled) {
+					containers.forEach((container) => {
+						content.appendChild(container)
+					})
+				} else {
+					let wrapper = document.createElement('div')
+					containers.forEach((container) => {
+						container.removeAttribute('layoutid')
+						wrapper.appendChild(container)
+						container.addEventListener('mouseover', () => {
+							layoutSelected = container
+						})
+					})
+					content.addEventListener('mouseout', () => {
+						layoutSelected = undefined
+					})
+					content.appendChild(wrapper)
+				}
+			} else {
+				initializeContentInTextMode(content, content)
+			}
+		} else {
+			initializeContentInTextMode(content, content)
+		}
 
 		contentState.push({
 			content: content.cloneNode(true),
@@ -2832,9 +2981,9 @@ document.addEventListener('DOMContentLoaded', () => {
 			}
 		}
 		if (!window.instanciateEditor) {
-			window.instanciateEditor = () => {
+			window.instanciateEditor = (initialValue) => {
 				root.innerHTML = ''
-				initialize()
+				initialize(initialValue)
 				return 'Editor Initialized'
 			}
 		}
