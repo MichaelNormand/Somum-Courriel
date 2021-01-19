@@ -2816,6 +2816,110 @@ document.addEventListener('DOMContentLoaded', () => {
 					content.appendChild(wrapper)
 				}
 			} else {
+				let popupPlaceHolder = document.createElement('div')
+				let popupContainer = document.createElement('div')
+				let popupHeader = document.createElement('div')
+				let popupBody = document.createElement('div')
+				let popupFooter = document.createElement('div')
+				let popupTitle = document.createElement('p')
+				let popupContent = document.createElement('p')
+				let confirmButton = document.createElement('button')
+				let body = document.querySelector('body')
+				body.style.width = '100%'
+				body.style.height = '100%'
+				body.style.position = 'absolute'
+
+				popupPlaceHolder.style.position = 'absolute'
+				popupPlaceHolder.style.backgroundColor = 'rgba(0, 0, 0, 0.5)'
+				popupPlaceHolder.style.width = '100%'
+				popupPlaceHolder.style.height = '100%'
+				popupPlaceHolder.style.display = 'flex'
+				popupPlaceHolder.style.justifyContent = 'center'
+				popupPlaceHolder.style.alignItems = 'center'
+				popupPlaceHolder.style.transition = 'opacity 0.3s ease'
+				popupPlaceHolder.style.top = '0'
+				popupPlaceHolder.style.left = '0'
+
+				popupContainer.style.display = 'flex'
+				popupContainer.style.flexDirection = 'column'
+				popupContainer.style.justifyContent = 'flex-start'
+				popupContainer.style.alignItems = 'flex-start'
+				popupContainer.style.borderRadius = '0.1em'
+				popupContainer.style.width = '450px'
+				popupContainer.style.backgroundColor = 'white'
+
+				popupHeader.style.display = 'flex'
+				popupHeader.style.backgroundColor = 'rgb(220, 53, 69)'
+				popupHeader.style.width = '100%'
+				popupHeader.style.justifyContent = 'space-between'
+				popupHeader.style.flexWrap = 'wrap'
+				popupHeader.style.borderTopRightRadius = '0.1em'
+				popupHeader.style.borderTopLeftRadius = '0.1em'
+				popupHeader.style.padding = '0.5em 1em'
+
+				popupBody.style.width = '100%'
+				popupBody.style.padding = '0.5em 1em'
+
+				popupFooter.style.display = 'flex'
+				popupFooter.style.flexWrap = 'wrap'
+				popupFooter.style.justifyContent = 'center'
+				popupFooter.style.alignItems = 'center'
+				popupFooter.style.padding = '0.5em 1em'
+				popupFooter.style.width = '100%'
+				popupFooter.style.borderBottomLeftRadius = '0.1em'
+				popupFooter.style.borderBottomRightRadius = '0.1em'
+
+				popupTitle.textContent = 'Erreur'
+				popupTitle.style.color = 'white'
+				popupTitle.style.fontFamily = "'Roboto', sans-serif"
+				popupTitle.style.fontSize = '26px'
+				popupTitle.style.fontWeight = 'bold'
+
+				popupContent.style.fontFamily = "'Roboto', sans-serif"
+				popupContent.style.fontSize = '16px'
+				popupContent.textContent = "Ce email n'est pas compatible avec cette fonctionnalitée."
+
+				let destroyPopup = () => {
+					body.removeChild(popupPlaceHolder)
+				}
+
+				confirmButton.textContent = 'OK'
+				confirmButton.style.fontFamily = "'Roboto', sans-serif"
+				confirmButton.style.fontSize = '16px'
+				confirmButton.style.padding = '0.5em 1em'
+				confirmButton.style.cursor = 'pointer'
+				confirmButton.style.backgroundColor = 'transparent'
+				confirmButton.style.color = 'rgb(220, 53, 69)'
+				confirmButton.style.fontWeight = 'bold'
+				confirmButton.style.outline = 'none'
+				confirmButton.style.border = '1px solid rgb(220, 53, 69)'
+				confirmButton.style.outlineOffset = '-1px'
+				confirmButton.style.transition = 'all 0.3s ease'
+				confirmButton.addEventListener('click', () => {
+					destroyPopup()
+				})
+				confirmButton.addEventListener('mouseenter', () => {
+					confirmButton.style.color = 'white'
+					confirmButton.style.backgroundColor = 'rgb(220, 53, 69)'
+				})
+				confirmButton.addEventListener('mouseout', () => {
+					confirmButton.style.color = 'rgb(220, 53, 69)'
+					confirmButton.style.backgroundColor = 'transparent'
+				})
+
+				popupFooter.appendChild(confirmButton)
+
+				popupBody.appendChild(popupContent)
+
+				popupHeader.appendChild(popupTitle)
+
+				popupContainer.appendChild(popupHeader)
+				popupContainer.appendChild(popupBody)
+				popupContainer.appendChild(popupFooter)
+
+				popupPlaceHolder.appendChild(popupContainer)
+
+				body.appendChild(popupPlaceHolder)
 				initializeContentInTextMode(content, content)
 			}
 		} else {
