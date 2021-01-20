@@ -1793,6 +1793,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		let firstParagraph = document.createElement('p')
 		let firstStyle = document.createElement('somum-custom-style')
 		let containerWidth = parseInt(mainContainer.style.width.replace('px', '')) - 21
+		layoutOptionToggled = false
 		firstContainer.style.display = 'flex'
 		firstContainer.style.flexDirection = 'column'
 		firstContainer.style.minHeight = '20px'
