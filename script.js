@@ -2677,6 +2677,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			let contentWidth = parseInt(content.style.width.replace('px', '')) - 21
 			parser.innerHTML = initValue
 			let table = parser.firstChild
+			let toggledLayoutOption = false
 			if (table.nodeName === 'TABLE') {
 				let tableRows = table.rows
 				let containers = []
@@ -2698,8 +2699,12 @@ document.addEventListener('DOMContentLoaded', () => {
 					paragraph.style.padding = 'none'
 					paragraph.contentEditable = 'true'
 
-					if (layoutid !== undefined) {
+					if (layoutid !== undefined && !toggledLayoutOption) {
 						layoutOptionToggled = true
+						toggledLayoutOption = true
+					} else if (layoutid === undefined && !toggledLayoutOption) {
+						layoutOptionToggled = false
+						toggledLayoutOption = true
 					}
 
 					if (!isContainerNumberedList && !isContainerOrderedList) {
