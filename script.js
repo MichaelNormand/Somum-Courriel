@@ -1788,12 +1788,14 @@ document.addEventListener('DOMContentLoaded', () => {
 		addContentState()
 	}
 
-	let initializeContentInTextMode = (container, mainContainer) => {
+	let initializeContentInTextMode = (container, mainContainer, keepLayoutState = false) => {
 		let firstContainer = document.createElement('div')
 		let firstParagraph = document.createElement('p')
 		let firstStyle = document.createElement('somum-custom-style')
 		let containerWidth = parseInt(mainContainer.style.width.replace('px', '')) - 21
-		layoutOptionToggled = false
+		if (!keepLayoutState) {
+			layoutOptionToggled = false
+		}
 		firstContainer.style.display = 'flex'
 		firstContainer.style.flexDirection = 'column'
 		firstContainer.style.minHeight = '20px'
@@ -1825,9 +1827,9 @@ document.addEventListener('DOMContentLoaded', () => {
 		let header = document.createElement('div')
 		let body = document.createElement('div')
 		let footer = document.createElement('div')
-		initializeContentInTextMode(header, container)
-		initializeContentInTextMode(body, container)
-		initializeContentInTextMode(footer, container)
+		initializeContentInTextMode(header, container, true)
+		initializeContentInTextMode(body, container, true)
+		initializeContentInTextMode(footer, container, true)
 		mainContainer.appendChild(header)
 		mainContainer.appendChild(body)
 		mainContainer.appendChild(footer)
