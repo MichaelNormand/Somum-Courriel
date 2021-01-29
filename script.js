@@ -7,6 +7,7 @@ let textAlignDropdownToggled = false
 let indentDropdownToggled = false
 let morePoliceDropdownToggled = false
 let layoutOptionToggled = false
+let contentFocused = false
 let layoutSelected
 let policeSelected = 'sans-serif'
 let sizeSelected = 'small'
@@ -2475,6 +2476,14 @@ document.addEventListener('DOMContentLoaded', () => {
 			}
 		})
 
+		content.addEventListener('focusin', () => {
+			contentFocused = true
+		})
+
+		content.addEventListener('focusout', () => {
+			contentFocused = false
+		})
+
 		content.addEventListener('contextmenu', (event) => {
 			event.preventDefault()
 			if (layoutOption !== undefined) {
@@ -2652,20 +2661,24 @@ document.addEventListener('DOMContentLoaded', () => {
 			if (!childSelected && content.contains(event.target)) {
 				selectionAlreadyChanged = true
 				if (layoutOptionToggled) {
-					placeCaretAtEnd(content.lastChild.lastChild.lastChild.lastChild)
-					selection = {
-						ActiveElements: [content.lastChild.lastChild.lastChild.lastChild],
-						HasSelection: false,
-						StartOffset: content.lastChild.lastChild.lastChild.lastChild.textContent.length,
-						EndOffset: content.lastChild.lastChild.lastChild.lastChild.textContent.length,
+					if (!contentFocused) {
+						placeCaretAtEnd(content.lastChild.lastChild.lastChild.lastChild)
+						selection = {
+							ActiveElements: [content.lastChild.lastChild.lastChild.lastChild],
+							HasSelection: false,
+							StartOffset: content.lastChild.lastChild.lastChild.lastChild.textContent.length,
+							EndOffset: content.lastChild.lastChild.lastChild.lastChild.textContent.length,
+						}
 					}
 				} else {
-					placeCaretAtEnd(content.lastChild.lastChild.lastChild)
-					selection = {
-						ActiveElements: [content.lastChild.lastChild.lastChild],
-						HasSelection: false,
-						StartOffset: content.lastChild.lastChild.lastChild.textContent.length,
-						EndOffset: content.lastChild.lastChild.lastChild.textContent.length,
+					if (!contentFocused) {
+						placeCaretAtEnd(content.lastChild.lastChild.lastChild)
+						selection = {
+							ActiveElements: [content.lastChild.lastChild.lastChild],
+							HasSelection: false,
+							StartOffset: content.lastChild.lastChild.lastChild.textContent.length,
+							EndOffset: content.lastChild.lastChild.lastChild.textContent.length,
+						}
 					}
 				}
 			}
