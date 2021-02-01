@@ -2484,6 +2484,109 @@ document.addEventListener('DOMContentLoaded', () => {
 			contentFocused = false
 		})
 
+		document.addEventListener('paste', (event) => {
+			event.preventDefault()
+			let data = event.clipboardData
+			let element = data.items[data.items.length - 1]
+			let type = element.kind
+			if (data) {
+				if (type.includes('file') && element.type.includes('image')) {
+					let file = element.getAsFile()
+					let reader = new FileReader()
+					reader.readAsDataURL(file)
+					reader.onload = (file) => {
+						addImageCallback(file.target.result)
+					}
+				} else if (type.includes('string')) {
+					const selection = window.getSelection()
+					let elementStart = selection.anchorNode.parentElement
+					let elementEnd = selection.focusNode.parentElement
+					let elementBase = selection.anchorOffset
+					let elementOffset = selection.focusOffset
+					let index = undefined
+					let deleteFistElement = false
+					let deleteLastElement = false
+					let elementToAppend
+					if (selection.anchorNode.nodeName === 'P') {
+						elementToAppend = selection.anchorNode.lastChild
+					} else if (selection.anchorNode.nodeName.includes('#text')) {
+						elementToAppend = document.createElement('somum-custom-style')
+						for (let i = 0; i < elementStart.parentElement.children.length; i++) {
+							index = i
+							if (elementStart.parentElement.children[i] === elementStart) {
+								elementBase = selection.anchorOffset
+								elementOffset = selection.focusOffset
+								elementStart = selection.anchorNode.parentElement
+								elementEnd = selection.focusNode.parentElement
+								if (elementBase === 0) {
+									deleteFistElement = true
+								}
+								if (elementOffset >= elementEnd.textContent.length) {
+									deleteLastElement = true
+								}
+								break
+							}
+							if (elementStart.parentElement.children[i] === elementEnd) {
+								elementBase = selection.focusOffset
+								elementOffset = selection.anchorOffset
+								elementStart = selection.focusNode.parentElement
+								elementEnd = selection.anchorNode.parentElement
+								if (elementBase === 0) {
+									deleteFistElement = true
+								}
+								if (elementOffset >= elementEnd.textContent.length) {
+									deleteLastElement = true
+								}
+								break
+							}
+						}
+						let firstSelectionPart
+						let textIndex = elementStart === elementEnd ? elementBase : elementStart.textContent.length
+						if (elementStart === elementEnd) {
+							firstSelectionPart = document.createElement('somum-custom-style')
+							firstSelectionPart.style.cssText = elementStart.style.cssText
+							elementStart.parentElement.insertBefore(firstSelectionPart, elementEnd)
+						} else {
+							firstSelectionPart = elementStart
+						}
+						firstSelectionPart.textContent = elementStart.textContent.substring(0, textIndex)
+						firstSelectionPart.innerHTML = elementStart.textContent.substring(0, textIndex).split(' ').join('&nbsp;')
+						if (firstSelectionPart.textContent.length <= 0) {
+							elementStart.parentElement.removeChild(firstSelectionPart)
+							deleteFistElement = false
+						}
+						elementStart.parentElement.insertBefore(elementToAppend, elementEnd)
+						if (elementOffset >= elementEnd.textContent.length) {
+							elementEnd.parentElement.removeChild(elementEnd)
+							deleteLastElement = false
+						} else {
+							elementEnd.textContent = elementEnd.textContent.substring(elementOffset, elementEnd.textContent.length)
+							elementEnd.innerHTML = elementEnd.textContent.split(' ').join('&nbsp;')
+						}
+						if (elementStart !== elementEnd) {
+							let parentElementLength = elementStart.parentElement.children.length
+							for (let i = index + 1; i < parentElementLength; i++) {
+								if (elementStart.nextElementSibling === elementToAppend) {
+									break
+								}
+								elementStart.parentElement.removeChild(elementStart.nextElementSibling)
+							}
+							if (deleteFistElement) {
+								elementStart.parentElement.removeChild(elementStart)
+							}
+							if (deleteLastElement) {
+								elementStart.parentElement.removeChild(elementEnd)
+							}
+						}
+					}
+					let text = event.clipboardData.getData('text')
+					elementToAppend.textContent = text
+					elementToAppend.innerHTML = text.split(' ').join('&nbsp;')
+				}
+				return
+			}
+		})
+
 		content.addEventListener('contextmenu', (event) => {
 			event.preventDefault()
 			if (layoutOption !== undefined) {
