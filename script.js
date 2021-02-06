@@ -1780,13 +1780,52 @@ document.addEventListener('DOMContentLoaded', () => {
 		imageContainer.style.width = `${mainContentWidth}px`
 		imageContainer.style.maxWidth = `${mainContentWidth}px`
 		imageContainer.setAttribute('isimagecontainer', 'true')
-		imageToAdd.src = image
-		imageToAdd.style.maxWidth = `${mainContentWidth / 2}px`
-		imageToAdd.onload = () => {
-			imageContainer.style.minHeight = `${imageToAdd.height + 5}px`
+		compressImage(image, (newUrl) => {
+			imageToAdd.src = newUrl
+			imageToAdd.style.maxWidth = `${mainContentWidth / 2}px`
+			imageToAdd.onload = () => {
+				imageContainer.style.minHeight = `${imageToAdd.height + 5}px`
+				firstContent.style.minHeight = `${imageToAdd.height + 5}px`
+				firstContent.parentElement.style.minHeight = `${imageToAdd.height + 5}px`
+			}
+			firstContent.appendChild(imageToAdd)
+			mainContent.scrollTop = mainContent.scrollHeight
+			addContentState()
+		})
+	}
+
+	let compressImage = (base64, imageProcessedCallback) => {
+		let mainContent = document.querySelector('#html-content-editor')
+		let mainContentWidth = parseInt(mainContent.style.width.replace('px', '')) - 21
+		const canvas = document.createElement('canvas')
+		const img = document.createElement('img')
+
+		img.onload = function () {
+			let width = img.width
+			let height = img.height
+			const maxHeight = mainContentWidth / 2
+			const maxWidth = mainContentWidth / 2
+
+			if (width > height) {
+				if (width > maxWidth) {
+					height = Math.round((height *= maxWidth / width))
+					width = maxWidth
+				}
+			} else {
+				if (height > maxHeight) {
+					width = Math.round((width *= maxHeight / height))
+					height = maxHeight
+				}
+			}
+			canvas.width = width
+			canvas.height = height
+
+			const ctx = canvas.getContext('2d')
+			ctx.drawImage(img, 0, 0, width, height)
+
+			imageProcessedCallback(canvas.toDataURL('image/jpeg', 0.7))
 		}
-		firstContent.appendChild(imageToAdd)
-		addContentState()
+		img.src = base64
 	}
 
 	let initializeContentInTextMode = (container, mainContainer, keepLayoutState = false) => {
@@ -2084,6 +2123,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				if (activeElement.tagName === 'P' && activeElement.children.length > 0 && activeElement.lastChild.tagName === 'SOMUM-CUSTOM-STYLE') {
 					event.preventDefault()
 					activeElement.lastChild.textContent = activeElement.lastChild.textContent + newValue.split(' ').join('&nbsp;')
+					activeElement.style.height = activeElement.lastChild.offsetHeight
 					placeCaretAtEnd(activeElement.lastChild)
 					addContentState()
 				} else if (activeElement.tagName === 'P' && (activeElement.children.length <= 0 || (activeElement.children[0] !== undefined && activeElement.children[0].tagName === 'BR'))) {
@@ -2102,6 +2142,7 @@ document.addEventListener('DOMContentLoaded', () => {
 					event.preventDefault()
 					activeElement.textContent = newValue.split(' ').join(' ')
 					activeElement.innerHTML = newValue.split(' ').join('&nbsp;')
+					activeElement.parentElement.style.height = activeElement.offsetHeight
 					placeCaretAtEnd(activeElement)
 				}
 			} else if (newValue == 'Delete') {
@@ -2119,6 +2160,8 @@ document.addEventListener('DOMContentLoaded', () => {
 					imageContainer.removeChild(image)
 					container.parentElement.removeAttribute('isimagecontainer')
 					container.parentElement.style.minHeight = '20px'
+					container.style.minHeight = '20px'
+					container.firstChild.style.minHeight = '20px'
 					placeCaretAtEnd(imageContainer)
 				}
 			} else if (newValue === 'Backspace') {
@@ -2154,6 +2197,8 @@ document.addEventListener('DOMContentLoaded', () => {
 							imageContainer.removeChild(image)
 							container.parentElement.removeAttribute('isimagecontainer')
 							container.parentElement.style.minHeight = '20px'
+							container.style.minHeight = '20px'
+							container.firstChild.style.minHeight = '20px'
 							placeCaretAtEnd(imageContainer)
 						} else if (isParentNumberedList || isParentOrderedList) {
 							let mainStructure = container.parentElement.parentElement
@@ -2474,6 +2519,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			} else if (newValue.length === 1 && isParentImageContainer) {
 				event.preventDefault()
 			}
+			content.scrollTop = content.scrollHeight
 		})
 
 		content.addEventListener('focusin', () => {
