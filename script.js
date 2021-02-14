@@ -1161,6 +1161,25 @@ document.addEventListener('DOMContentLoaded', () => {
 		return redoSelectionContainer
 	}
 
+	let adjustHeightOfElement = (element, content) => {
+		let rowWidth = 0
+		let rowHeight = 0
+		let contentWidth = parseInt(content.style.width.replace('px', '')) - 21
+		let containerHeight = 0
+		for (let i = 0; i < element.children.length; i++) {
+			rowWidth += element.children[i].offsetWidth
+			rowHeight = element.children[i].offsetHeight > rowHeight ? element.children[i].offsetHeight : rowHeight
+			if (rowWidth >= contentWidth) {
+				rowWidth = 0
+				containerHeight += rowHeight
+				rowHeight = 0
+			}
+		}
+		containerHeight += rowHeight
+		element.style.minHeight = `${rowHeight}px`
+		element.parentElement.style.minHeight = `${rowHeight}px`
+	}
+
 	let addContentState = () => {
 		let content = document.querySelector('#html-content-editor')
 		let pTags = document.querySelectorAll('#html-content-editor p')
@@ -1410,6 +1429,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			element.style.fontFamily = police
 		})
 		placeCaretAtEnd(elementsToChange.pop())
+		adjustHeightOfElement(elementsToChange[0].parentElement, document.querySelector('#html-content-editor'))
 		addContentState()
 	}
 
@@ -1424,6 +1444,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		elementsToChange.forEach((element) => {
 			element.style.fontSize = size
 		})
+		adjustHeightOfElement(elementsToChange[0].parentElement, document.querySelector('#html-content-editor'))
 		placeCaretAtEnd(elementsToChange.pop())
 		addContentState()
 	}
@@ -1439,6 +1460,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		elementsToChange.forEach((element) => {
 			element.style.color = color
 		})
+		adjustHeightOfElement(elementsToChange[0].parentElement, document.querySelector('#html-content-editor'))
 		placeCaretAtEnd(elementsToChange.pop())
 		addContentState()
 	}
@@ -1458,6 +1480,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			}
 			element.style.fontWeight = 'bold'
 		})
+		adjustHeightOfElement(elementsToChange[0].parentElement, document.querySelector('#html-content-editor'))
 		placeCaretAtEnd(elementsToChange.pop())
 		addContentState()
 	}
@@ -1477,6 +1500,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			}
 			element.style.fontStyle = 'italic'
 		})
+		adjustHeightOfElement(elementsToChange[0].parentElement, document.querySelector('#html-content-editor'))
 		placeCaretAtEnd(elementsToChange.pop())
 		addContentState()
 	}
@@ -1515,6 +1539,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		}
 		container.style.textAlign = 'left'
 		container.style.justifyContent = 'flex-start'
+		adjustHeightOfElement(elementsToChange[0].parentElement, document.querySelector('#html-content-editor'))
 		placeCaretAtEnd(container.lastChild)
 		addContentState()
 	}
@@ -1534,6 +1559,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		}
 		container.style.textAlign = 'center'
 		container.style.justifyContent = 'center'
+		adjustHeightOfElement(elementsToChange[0].parentElement, document.querySelector('#html-content-editor'))
 		placeCaretAtEnd(container.lastChild)
 		addContentState()
 	}
@@ -1553,6 +1579,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		}
 		container.style.textAlign = 'right'
 		container.style.justifyContent = 'flex-end'
+		adjustHeightOfElement(elementsToChange[0].parentElement, document.querySelector('#html-content-editor'))
 		placeCaretAtEnd(container.lastChild)
 		addContentState()
 	}
@@ -1575,6 +1602,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		}
 		let currentIndentSize = parseInt(currentIndent) + sizeIndent
 		firstElement.style.marginLeft = currentIndentSize + 'px'
+		adjustHeightOfElement(elementsToChange[0].parentElement, document.querySelector('#html-content-editor'))
 		placeCaretAtEnd(container.lastChild)
 		addContentState()
 	}
@@ -1598,6 +1626,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			return
 		}
 		firstElement.style.marginLeft = ''
+		adjustHeightOfElement(elementsToChange[0].parentElement, document.querySelector('#html-content-editor'))
 		addContentState()
 		placeCaretAtEnd(container.lastChild)
 	}
@@ -1795,6 +1824,10 @@ document.addEventListener('DOMContentLoaded', () => {
 	}
 
 	let compressImage = (base64, imageProcessedCallback) => {
+		if (base64.includes('image/gif')) {
+			imageProcessedCallback(base64)
+			return
+		}
 		let mainContent = document.querySelector('#html-content-editor')
 		let mainContentWidth = parseInt(mainContent.style.width.replace('px', '')) - 21
 		const canvas = document.createElement('canvas')
@@ -1823,7 +1856,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			const ctx = canvas.getContext('2d')
 			ctx.drawImage(img, 0, 0, width, height)
 
-			imageProcessedCallback(canvas.toDataURL('image/jpeg', 0.7))
+			imageProcessedCallback(canvas.toDataURL(base64.includes('image/png') ? 'image/png' : 'image/jpeg', 0.7))
 		}
 		img.src = base64
 	}
@@ -2364,14 +2397,14 @@ document.addEventListener('DOMContentLoaded', () => {
 					}
 					newMainContainer.style.display = 'flex'
 					newMainContainer.style.flexDirection = 'column'
-					newMainContainer.style.minHeight = '20px'
+					newMainContainer.style.minHeight = setCaretAtBegining ? container.style.minHeight : '20px'
 					newMainContainer.style.maxWidth = `${containerWidth}px`
 					newMainContainer.style.width = `${containerWidth}px`
 
 					newContainer.contentEditable = 'true'
 					newContainer.style.width = newMainContainer.style.width
 					newContainer.style.maxWidth = newMainContainer.style.width
-					newContainer.style.minHeight = '20px'
+					newContainer.style.minHeight = setCaretAtBegining ? container.style.minHeight : '20px'
 					newContainer.style.cursor = 'text'
 					newContainer.style.outline = 'none'
 					newContainer.addEventListener('focusin', () => {
@@ -2519,6 +2552,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			} else if (newValue.length === 1 && isParentImageContainer) {
 				event.preventDefault()
 			}
+			adjustHeightOfElement(container, content)
 			content.scrollTop = content.scrollHeight
 		})
 
@@ -2628,6 +2662,7 @@ document.addEventListener('DOMContentLoaded', () => {
 					let text = event.clipboardData.getData('text')
 					elementToAppend.textContent = text
 					elementToAppend.innerHTML = text.split(' ').join('&nbsp;')
+					adjustHeightOfElement(elementToAppend.tagName === 'P' ? elementToAppend : elementToAppend.parentElement, document.querySelector('#html-content-editor'))
 				}
 				return
 			}
@@ -2852,11 +2887,12 @@ document.addEventListener('DOMContentLoaded', () => {
 					let layoutid = tableRows[i].getAttribute('layoutid') !== null ? (isNaN(parseInt(tableRows[i].getAttribute('layoutid'))) ? undefined : parseInt(tableRows[i].getAttribute('layoutid'))) : undefined
 					let cells = tableRows[i].cells[0].children
 					let paragraph = document.createElement('p')
+					let column = tableRows[i].cells[0]
 					let container
 
 					paragraph.style.width = `${contentWidth}px`
 					paragraph.style.maxWidth = `${contentWidth}px`
-					paragraph.style.minHeight = '20px'
+					paragraph.style.minHeight = tableRows[i].cells[0].style.minHeight
 					paragraph.style.cursor = 'text'
 					paragraph.style.outline = 'none'
 					paragraph.style.borderBottom = 'none'
@@ -2925,7 +2961,7 @@ document.addEventListener('DOMContentLoaded', () => {
 					container.style.display = 'flex'
 					container.style.width = `${contentWidth}px`
 					container.style.maxWidth = `${contentWidth}px`
-					container.style.minHeight = '20px'
+					container.style.minHeight = tableRows[i].cells[0].style.minHeight
 					container.style.flexDirection = 'column'
 
 					container.appendChild(paragraph)
