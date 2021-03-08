@@ -1166,18 +1166,17 @@ document.addEventListener('DOMContentLoaded', () => {
 		let rowHeight = 0
 		let contentWidth = parseInt(content.style.width.replace('px', '')) - 21
 		let containerHeight = 0
-		for (let i = 0; i < element.children.length; i++) {
-			rowWidth += element.children[i].offsetWidth
-			rowHeight = element.children[i].offsetHeight > rowHeight ? element.children[i].offsetHeight : rowHeight
-			if (rowWidth >= contentWidth) {
-				rowWidth = 0
-				containerHeight += rowHeight
-				rowHeight = 0
-			}
+		if (element.children.length > 1) {
+			element.style.minHeight = `${element.scrollHeight}px`
+			element.parentElement.style.minHeight = `${element.scrollHeight}px`
+			element.offsetHeight = element.scrollHeight
+			element.parentElement.offsetHeight = element.scrollHeight
+			return
 		}
-		containerHeight += rowHeight
-		element.style.minHeight = `${rowHeight}px`
-		element.parentElement.style.minHeight = `${rowHeight}px`
+		element.style.minHeight = `${element.children[0].offsetHeight + 5}px`
+		element.parentElement.style.minHeight = `${element.children[0].offsetHeight + 5}px`
+		element.offsetHeight = element.children[0].offsetHeight + 5
+		element.parentElement.offsetHeight = element.children[0].offsetHeight + 5
 	}
 
 	let addContentState = () => {
@@ -1814,8 +1813,11 @@ document.addEventListener('DOMContentLoaded', () => {
 			imageToAdd.style.maxWidth = `${mainContentWidth / 2}px`
 			imageToAdd.onload = () => {
 				imageContainer.style.minHeight = `${imageToAdd.height + 5}px`
+				imageContainer.offsetHeight = imageToAdd.height + 5
 				firstContent.style.minHeight = `${imageToAdd.height + 5}px`
+				firstContent.offsetHeight = imageToAdd.height + 5
 				firstContent.parentElement.style.minHeight = `${imageToAdd.height + 5}px`
+				firstContent.parentElement.offsetHeight = imageToAdd.height + 5
 			}
 			firstContent.appendChild(imageToAdd)
 			mainContent.scrollTop = mainContent.scrollHeight
@@ -2552,7 +2554,9 @@ document.addEventListener('DOMContentLoaded', () => {
 			} else if (newValue.length === 1 && isParentImageContainer) {
 				event.preventDefault()
 			}
-			adjustHeightOfElement(container, content)
+			if (!isParentImageContainer) {
+				adjustHeightOfElement(container, content)
+			}
 			content.scrollTop = content.scrollHeight
 		})
 
