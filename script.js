@@ -2556,7 +2556,6 @@ document.addEventListener('DOMContentLoaded', () => {
 			if (!isParentImageContainer) {
 				adjustHeightOfElement(container, content)
 			}
-			content.scrollTop = content.scrollHeight
 		})
 
 		content.addEventListener('focusin', () => {
