@@ -1820,7 +1820,6 @@ document.addEventListener('DOMContentLoaded', () => {
 				firstContent.parentElement.offsetHeight = imageToAdd.height + 5
 			}
 			firstContent.appendChild(imageToAdd)
-			mainContent.scrollTop = mainContent.scrollHeight
 			addContentState()
 		})
 	}
