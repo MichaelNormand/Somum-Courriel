@@ -2567,10 +2567,14 @@ document.addEventListener('DOMContentLoaded', () => {
 		})
 
 		document.addEventListener('paste', (event) => {
-			event.preventDefault()
 			let data = event.clipboardData
 			let element = data.items[data.items.length - 1]
 			let type = element.kind
+			const selection = window.getSelection()
+			if (!content.contains(selection.anchorNode)) {
+				return
+			}
+			event.preventDefault()
 			if (data) {
 				if (type.includes('file') && element.type.includes('image')) {
 					let file = element.getAsFile()
@@ -2580,7 +2584,6 @@ document.addEventListener('DOMContentLoaded', () => {
 						addImageCallback(file.target.result)
 					}
 				} else if (type.includes('string')) {
-					const selection = window.getSelection()
 					let elementStart = selection.anchorNode.parentElement
 					let elementEnd = selection.focusNode.parentElement
 					let elementBase = selection.anchorOffset
@@ -2660,6 +2663,8 @@ document.addEventListener('DOMContentLoaded', () => {
 								elementStart.parentElement.removeChild(elementEnd)
 							}
 						}
+					} else if (selection.anchorNode.nodeName.includes('SOMUM-CUSTOM-STYLE')) {
+						elementToAppend = selection.anchorNode
 					}
 					let text = event.clipboardData.getData('text')
 					elementToAppend.textContent = text
