@@ -3090,7 +3090,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 				popupContent.style.fontFamily = "'Roboto', sans-serif"
 				popupContent.style.fontSize = '16px'
-				popupContent.textContent = "Ce email n'est pas compatible avec cette fonctionnalitée."
+				popupContent.textContent = "Ce courriel n'est pas compatible avec cette fonctionnalité."
 
 				let destroyPopup = () => {
 					body.removeChild(popupPlaceHolder)
